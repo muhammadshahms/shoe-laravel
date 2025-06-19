@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, ShoppingCart, Star } from "lucide-react";
+import { ChevronLeft, ChevronRight, Instagram, ShoppingCart, Star, Twitter, Youtube } from "lucide-react";
 import {
   Tabs,
   TabsList,
@@ -9,6 +9,8 @@ import {
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Footer from "@/components/Global/Footer";
+import Header from "@/components/Global/Header";
 
 // @ts-nocheck
 type Product = {
@@ -92,23 +94,7 @@ export default function AllRunPage() {
     <div className=" text-white min-h-screen font-sans bg bg-gradient-to-b from-gray-900 to-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <header className="sticky top-3 z-50 flex justify-between items-center px-8 py-5 bg-gray-800 bg-opacity-80 backdrop-blur-md rounded-lg shadow-lg">
-          <h1 className="text-2xl font-bold text-yellow-400">AllRun</h1>
-          <nav className="hidden md:flex space-x-8 text-sm">
-            <a href="#" className="hover:text-yellow-400">Home</a>
-            <a href="#" className="hover:text-yellow-400">About Us</a>
-            <a href="#" className="hover:text-yellow-400">Category</a>
-          </nav>
-
-          <div className="flex items-center space-x-4">
-            <ShoppingCart />
-            <Avatar>
-              <AvatarImage src="https://github.com/shadcn.png" />
-              <AvatarFallback>CN</AvatarFallback>
-            </Avatar>
-
-          </div>
-        </header>
+        <Header />
 
 
         {/* Hero Section */}
@@ -436,25 +422,7 @@ export default function AllRunPage() {
         </section>
 
         {/* Footer */}
-        <footer className="bg-gray-900 text-gray-400 p-10 mt-10 text-sm">
-          <div className="grid md:grid-cols-3 gap-6">
-            <div>
-              <h4 className="text-white font-bold mb-2">AllRun</h4>
-              <p className="mb-1">Experience the best comfort in every step</p>
-              <p>New York, NY</p>
-            </div>
-            <div>
-              <h4 className="text-white font-bold mb-2">Company</h4>
-              <p>About</p>
-              <p>Careers</p>
-            </div>
-            <div>
-              <h4 className="text-white font-bold mb-2">Support</h4>
-              <p>Contact</p>
-              <p>Help Center</p>
-            </div>
-          </div>
-        </footer>
+        <Footer />
       </div>
     </div>
   );
