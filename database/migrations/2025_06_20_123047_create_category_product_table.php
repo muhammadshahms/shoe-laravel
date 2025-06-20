@@ -7,20 +7,15 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('wishlists', function (Blueprint $table) {
-            $table->id();
-
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+        Schema::create('category_product', function (Blueprint $table) {
+            $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
-
-            $table->timestamps();
-
-            $table->unique(['user_id', 'product_id']); // prevent duplicates
+            $table->primary(['category_id', 'product_id']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('wishlists');
+        Schema::dropIfExists('category_product');
     }
 };
