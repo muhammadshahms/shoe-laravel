@@ -46,7 +46,11 @@ class Category extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('banner')
-             ->singleFile()
-             ->useFallbackUrl('/images/default-category.png');
+            ->singleFile()
+            ->useFallbackUrl('/images/default-category.png');
+    }
+    public function getRouteKeyName()
+    {
+        return 'slug'; 
     }
 }

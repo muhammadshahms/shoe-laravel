@@ -16,3 +16,4 @@ Route::get('/', function () {
 require __DIR__.'/dashboard.php';
 require __DIR__.'/auth.php';
 require __DIR__.'/product/index.php';
+require __DIR__.'/category/index.php';
