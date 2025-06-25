@@ -96,48 +96,47 @@ export default function ProductForm({ product = {}, brands = [], categories = []
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
+                <div className="space-y-2">
                     <Label htmlFor="name">Name</Label>
-                    <Input id="name" {...register('name')} />
+                    <Input id="name" placeholder="e.g. Red Leather Wallet" {...register('name')} />
+                    <p className="text-xs text-muted-foreground mt-1">Enter a unique product name.</p>
                     {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>}
                 </div>
-
-                <div>
+                <div className="space-y-2">
                     <Label htmlFor="sku">SKU</Label>
-                    <Input id="sku" {...register('sku')} />
-                </div>
-
-                <div>
+                    <Input id="sku" placeholder="e.g. RED-WALLET-001" {...register('sku')} />
+                    <p className="text-xs text-muted-foreground mt-1">Unique inventory code (optional)</p>
+                </div >
+                <div className='space-y-2'>
                     <Label htmlFor="barcode">Barcode</Label>
-                    <Input id="barcode" {...register('barcode')} />
+                    <Input id="barcode" placeholder="e.g. 1234567890123" {...register('barcode')} />
+                    <p className="text-xs text-muted-foreground mt-1">Scannable product code (optional)</p>
                 </div>
-
-                <div>
+                <div className='space-y-2'>
                     <Label htmlFor="price">Price</Label>
-                    <Input id="price" type="number" step="0.01" {...register('price', { valueAsNumber: true })} />
+                    <Input id="price" type="number" step="0.01" placeholder="e.g. 499.99" {...register('price', { valueAsNumber: true })} />
+                    <p className="text-xs text-muted-foreground mt-1">Set the product's selling price.</p>
+                    {errors.price && <p className="text-sm text-red-500 mt-1">{errors.price.message}</p>}
                 </div>
-
-                <div>
+                <div className='space-y-2'>
                     <Label>Special Price</Label>
-                    <Input type="number" step="0.01" {...register('special_price', { valueAsNumber: true })} />
+                    <Input type="number" step="0.01" placeholder="e.g. 399.99 (optional)" {...register('special_price', { valueAsNumber: true })} />
                 </div>
-
-                <div>
+                <div className='space-y-2'>
                     <Label>Quantity</Label>
-                    <Input type="number" {...register('quantity', { valueAsNumber: true })} />
+                    <Input type="number" placeholder="e.g. 100" {...register('quantity', { valueAsNumber: true })} />
+                    <p className="text-xs text-muted-foreground mt-1">Enter available stock quantity.</p>
+                    {errors.quantity && <p className="text-sm text-red-500 mt-1">{errors.quantity.message}</p>}
                 </div>
-
-                <div>
+                <div className='space-y-2'>
                     <Label>Special Price Start</Label>
                     <Input type="date" {...register('special_price_start')} />
                 </div>
-
-                <div>
+                <div className='space-y-2'>
                     <Label>Special Price End</Label>
                     <Input type="date" {...register('special_price_end')} />
                 </div>
-
-                <div>
+                <div className='space-y-2'>
                     <Label>Brand</Label>
                     <Controller
                         control={control}
@@ -159,31 +158,26 @@ export default function ProductForm({ product = {}, brands = [], categories = []
                         )}
                     />
                 </div>
-
-                <div>
+                <div className='space-y-2'>
                     <Label>Weight</Label>
-                    <Input type="number" step="0.01" {...register('weight', { valueAsNumber: true })} />
+                    <Input type="number" step="0.01" placeholder="e.g. 1.25" {...register('weight', { valueAsNumber: true })} />
                 </div>
-
-                <div>
+                <div    className='space-y-2'>
                     <Label>Dimensions</Label>
-                    <Input {...register('dimensions')} />
+                    <Input placeholder="e.g. 10x20x30 cm" {...register('dimensions')} />
                 </div>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
+                <div className="space-y-2">
                     <Label>Description</Label>
-                    <Textarea {...register('description')} />
+                    <Textarea placeholder="Detailed product description..." {...register('description')} />
                 </div>
-
-                <div>
+                <div className="space-y-2">
                     <Label>Short Description</Label>
-                    <Textarea {...register('short_description')} />
+                    <Textarea placeholder="e.g. Compact leather wallet for men..." {...register('short_description')} />
                 </div>
             </div>
-
-            <div>
+            <div className="space-y-2">
                 <Label>Categories</Label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
                     {categories.map((cat) => (
@@ -198,8 +192,7 @@ export default function ProductForm({ product = {}, brands = [], categories = []
                         </label>
                     ))}
                 </div>
-            </div>
-
+            </div >
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <Controller
                     name="in_stock"
@@ -232,30 +225,27 @@ export default function ProductForm({ product = {}, brands = [], categories = []
                     )}
                 />
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 ">
+                <div className="space-y-2">
                     <Label>Meta Title</Label>
-                    <Input {...register('meta_title')} />
+                    <Input placeholder="e.g. Buy Red Leather Wallet Online" {...register('meta_title')} />
                 </div>
-                <div>
+                <div className="space-y-2">
                     <Label>Meta Description</Label>
-                    <Textarea {...register('meta_description')} />
+                    <Textarea placeholder="e.g. High-quality wallet, genuine leather, perfect for gifting" {...register('meta_description')} />
                 </div>
-                <div>
+                <div className="space-y-2">
                     <Label>Meta Keywords</Label>
-                    <Input {...register('meta_keywords')} />
+                    <Input placeholder="e.g. wallet, leather, gift, red" {...register('meta_keywords')} />
                 </div>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
+                <div className="space-y-2">
                     <Label>Main Image</Label>
                     <Input type="file" onChange={(e) => setMainImage(e.target.files[0])} />
                     {mainImageUrl && <img src={mainImageUrl} alt="Main" className="w-24 mt-2 rounded" />}
                 </div>
-
-                <div>
+                <div className="space-y-2">
                     <Label>Gallery Images</Label>
                     <Input type="file" multiple onChange={(e) => setGallery([...e.target.files])} />
                     {galleryUrls?.length > 0 && (
@@ -267,7 +257,6 @@ export default function ProductForm({ product = {}, brands = [], categories = []
                     )}
                 </div>
             </div>
-
             <Button type="submit" className="w-full mt-6">
                 {product?.slug ? 'Update' : 'Create'} Product
             </Button>
