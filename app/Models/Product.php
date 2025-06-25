@@ -78,8 +78,8 @@ class Product extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('main_image')
-             ->singleFile()
-             ->useFallbackUrl('/images/default-product.png');
+            ->singleFile()
+            ->useFallbackUrl('/images/default-product.png');
 
         $this->addMediaCollection('gallery');
     }
@@ -90,5 +90,10 @@ class Product extends Model implements HasMedia
             return $this->special_price;
         }
         return $this->price;
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
     }
 }
