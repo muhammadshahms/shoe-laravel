@@ -9,11 +9,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { Brand, Category, Product, Props } from '@/types/product';
-import { productSchema } from '@/validations/product-schema';
-import { Separator } from '@/components/ui/separator';
+import { Category, Product, Props, baseProductSchema } from '@/validations/product-schema';
 
-export default function ProductForm({ product = {}, brands, categories, mainImageUrl = '', galleryUrls = [] }: Props) {
+export default function ProductForm({ product, brands, categories, mainImageUrl = '', galleryUrls = [] }: Props) {
     const [mainImage, setMainImage] = useState<File | null>(null);
     const [gallery, setGallery] = useState<File[]>([]);
 
@@ -23,7 +21,7 @@ export default function ProductForm({ product = {}, brands, categories, mainImag
             price: product.price ?? undefined,
             quantity: product.quantity ?? undefined,
             brand_id: product.brand?.id?.toString() ?? undefined,
-            category_ids: product.categories?.map((c) => c.id.toString()) ?? [],
+            category_ids: categories?.map((c : Category) => c.id.toString()) ?? [],
             in_stock: product.in_stock ?? false,
             is_active: product.is_active ?? true,
             is_featured: product.is_featured ?? false,
@@ -35,12 +33,12 @@ export default function ProductForm({ product = {}, brands, categories, mainImag
         handleSubmit,
         control,
         formState: { errors },
-    } = useForm<z.infer<typeof productSchema>>({
-        resolver: zodResolver(productSchema),
-        defaultValues: getDefaultProductValues(product),
+    } = useForm<Product>({
+        resolver: zodResolver(baseProductSchema),
+        defaultValues: getDefaultProductValues(product ?? {}),
     });
 
-    const onSubmit = (data: z.infer<typeof productSchema>) => {
+    const onSubmit = (data: z.infer<typeof baseProductSchema>) => {
         const formData = new FormData();
         const isEditing = !!product?.slug;
 
