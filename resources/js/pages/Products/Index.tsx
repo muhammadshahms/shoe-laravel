@@ -15,7 +15,21 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { router } from '@inertiajs/react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
-
+import Pagination from '@/components/pagination';
+interface Props {
+    products: {
+        data: Product[];
+        meta: {
+            current_page: number;
+            last_page: number;
+        };
+        links: {
+            url: string | null;
+            label: string;
+            active: boolean;
+        }[];
+    };
+}
 
 export default function Index({ products }) {
     const [selected, setSelected] = useState([]);
@@ -103,7 +117,9 @@ export default function Index({ products }) {
                                     <TableCell className="px-2">{product.name}</TableCell>
                                     <TableCell className="px-2">{product.price}</TableCell>
                                     <TableCell className="px-2">{product.brand?.name || '—'}</TableCell>
-                                    <TableCell className="px-2">{product.category?.name || '—'}</TableCell>
+                                    <TableCell className="px-2">
+                                        {product.categories_list || '—'}
+                                    </TableCell>
                                     <TableCell className="px-2">{product.quantity}</TableCell>
 
                                     <TableCell className="px-2 w-24">
@@ -124,6 +140,7 @@ export default function Index({ products }) {
                             ))}
                         </TableBody>
                     </Table>
+                    <Pagination meta={products.meta} links={products.links} />
                 </Card>
             </div>
         </AppLayout>

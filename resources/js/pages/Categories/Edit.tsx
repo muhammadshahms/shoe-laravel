@@ -30,10 +30,11 @@ export default function Edit({ category, parents }: Props) {
     const { data, setData, put, processing, errors } = useForm({
         name: category.name,
         description: category.description,
-        parent_id: category.parent_id ?? '',
+        parent_id: category.parent_id !== null ? String(category.parent_id) : 'null',
         position: category.position ?? '',
         is_active: category.is_active,
     });
+
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -44,22 +45,30 @@ export default function Edit({ category, parents }: Props) {
 
         <AppLayout>
             <form onSubmit={handleSubmit} className="space-y-4 p-4">
-                <div>
+                <div className='space-y-2'>
                     <Label>Name</Label>
                     <Input value={data.name} onChange={(e) => setData('name', e.target.value)} />
                     {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
                 </div>
 
-                <div>
+                <div className='space-y-2'>
                     <Label>Description</Label>
                     <Textarea value={data.description} onChange={(e) => setData('description', e.target.value)} />
                 </div>
 
-                <div>
+                <div className='space-y-2'>
                     <Label>Parent Category</Label>
-                    <Select value={data.parent_id} onValueChange={(value) => setData('parent_id', value)}>
+                    <Select
+                        value={data.parent_id}
+                        onValueChange={(value) => setData('parent_id', value === 'null' ? null : value)}
+                    >
                         <SelectTrigger>
-                            <SelectValue placeholder="Select parent category" />
+                            <SelectValue
+                                placeholder="Select parent category"
+                                defaultValue={
+                                    parents.find((p) => String(p.id) === data.parent_id)?.name ?? 'None'
+                                }
+                            />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="null">None</SelectItem>
@@ -70,9 +79,11 @@ export default function Edit({ category, parents }: Props) {
                             ))}
                         </SelectContent>
                     </Select>
+
+
                 </div>
 
-                <div>
+                <div className='space-y-2'>
                     <Label>Position</Label>
                     <Input type="number" value={data.position} onChange={(e) => setData('position', e.target.value)} />
                 </div>

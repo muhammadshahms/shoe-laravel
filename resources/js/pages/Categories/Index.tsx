@@ -20,6 +20,8 @@ interface Props {
     categories: Category[];
 }
 
+
+
 export default function Index({ categories }: Props) {
     const handleDelete = (slug: string) => {
         if (confirm('Are you sure you want to delete this category?')) {

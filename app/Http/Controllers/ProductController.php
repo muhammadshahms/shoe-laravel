@@ -13,14 +13,25 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::with(['brand', 'categories'])
+        $products = Product::with(['brand', 'categories.parent'])
             ->latest()
             ->paginate(10);
+
+        $products->getCollection()->transform(function ($product) {
+            $product->categories_list = $product->categories->map(function ($category) {
+                return $category->parent
+                    ? $category->parent->name . ' > ' . $category->name
+                    : $category->name;
+            })->implode(', ');
+
+            return $product;
+        });
 
         return Inertia::render('Products/Index', [
             'products' => $products
         ]);
     }
+
 
     public function create()
     {
