@@ -32,12 +32,11 @@ class ProductController extends Controller
         ]);
     }
 
-
     public function create()
     {
         return Inertia::render('Products/Create', [
             'brands' => Brand::select('id', 'name')->get(),
-            'categories' => Category::select('id', 'name')->get(),
+            'categories' => Category::with('children')->whereNull('parent_id')->get(),
         ]);
     }
 
@@ -91,7 +90,7 @@ class ProductController extends Controller
         return Inertia::render('Products/Edit', [
             'product' => $product->load(['brand', 'categories']),
             'brands' => Brand::select('id', 'name')->get(),
-            'categories' => Category::select('id', 'name')->get(),
+            'categories' => Category::with('children')->whereNull('parent_id')->get(),
             'main_image_url' => $product->getFirstMediaUrl('main_image'),
             'gallery_urls' => $product->getMedia('gallery')->map->getUrl(),
         ]);
@@ -144,9 +143,23 @@ class ProductController extends Controller
         return redirect()->route('products.index')->with('success', 'Product updated successfully.');
     }
 
+    // ✅ Soft delete single product
     public function destroy(Product $product)
     {
         $product->delete();
         return redirect()->back()->with('success', 'Product deleted.');
+    }
+
+    // ✅ Bulk soft delete
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'slugs' => 'required|array',
+            'slugs.*' => 'string|exists:products,slug',
+        ]);
+
+        Product::whereIn('slug', $request->slugs)->delete();
+
+        return redirect()->back()->with('success', 'Selected products deleted.');
     }
 }

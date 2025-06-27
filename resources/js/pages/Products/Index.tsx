@@ -1,5 +1,7 @@
+// File: pages/dashboard/products/index.tsx
+
 import React, { useState } from 'react';
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
@@ -12,45 +14,42 @@ import {
     TableCell,
 } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
-import { router } from '@inertiajs/react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import Pagination from '@/components/pagination';
-interface Props {
-    products: {
-        data: Product[];
-        meta: {
-            current_page: number;
-            last_page: number;
-        };
-        links: {
-            url: string | null;
-            label: string;
-            active: boolean;
-        }[];
-    };
+import { Product } from '@/types/product';
+
+interface ProductIndexProps {
+  products: {
+    data: Product[];
+    meta: any;
+    links: any;
+  };
 }
 
-export default function Index({ products }) {
-    const [selected, setSelected] = useState([]);
+export default function Index({ products }: ProductIndexProps) {
+    const [selected, setSelected] = useState<string[]>([]);
 
     const toggleSelectAll = () => {
         if (selected.length === products.data.length) {
             setSelected([]);
         } else {
-            setSelected(products.data.map(p => p.id));
+            setSelected(products.data.map(p => p.slug!));
         }
     };
 
-    const toggleSelectOne = (id) => {
+    const toggleSelectOne = (slug: string) => {
         setSelected(prev =>
-            prev.includes(id) ? prev.filter(pid => pid !== id) : [...prev, id]
+            prev.includes(slug)
+                ? prev.filter(s => s !== slug)
+                : [...prev, slug]
         );
     };
 
-    const isAllSelected = products.data.length > 0 && selected.length === products.data.length;
+    const isAllSelected =
+        products.data.length > 0 && selected.length === products.data.length;
 
-    const handleDelete = (slug) => {
+    const handleDelete = (slug: string) => {
         if (!confirm('Are you sure you want to delete this product?')) return;
 
         router.delete(`/dashboard/products/${slug}`, {
@@ -59,24 +58,49 @@ export default function Index({ products }) {
         });
     };
 
+    const handleBulkDelete = () => {
+        if (selected.length === 0) {
+            toast.warning('No products selected.');
+            return;
+        }
+
+        if (!confirm(`Delete ${selected.length} product(s)?`)) return;
+
+        router.post('/dashboard/products/bulk-delete', { slugs: selected }, {
+            onSuccess: () => {
+                toast.success('Selected products deleted');
+                setSelected([]);
+            },
+            onError: () => toast.error('Bulk delete failed'),
+        });
+    };
 
     return (
         <AppLayout>
             <div className="p-4 space-y-4">
                 <div className="flex justify-between items-center gap-4">
-                    {/* Search input */}
                     <Input
                         type="text"
                         placeholder="Search products..."
                         className="max-w-sm"
-                    // Optional: add onChange or value binding
                     />
 
-                    <Link href="/dashboard/products/create">
-                        <Button>Add Product</Button>
-                    </Link>
-                </div>
+                    <div className="flex items-center gap-2">
+                        {selected.length > 0 && (
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={handleBulkDelete}
+                            >
+                                Delete Selected
+                            </Button>
+                        )}
 
+                        <Link href="/dashboard/products/create">
+                            <Button>Add Product</Button>
+                        </Link>
+                    </div>
+                </div>
 
                 <Card className="overflow-auto max-h-[calc(100vh-200px)] border rounded-xl">
                     <Table>
@@ -103,25 +127,30 @@ export default function Index({ products }) {
                         <TableBody className="divide-y divide-gray-200">
                             {products.data.map((product, index) => (
                                 <TableRow
-                                    key={product?.slug}
+                                    key={product.slug || product.id}
                                     className="first:rounded-t-md last:rounded-b-md hover:bg-muted/40"
                                 >
                                     <TableCell className="w-10 px-2">
                                         <Checkbox
-                                            checked={selected.includes(product?.slug)}
-                                            onCheckedChange={() => toggleSelectOne(product?.slug)}
+                                            checked={selected.includes(product.slug!)}
+                                            onCheckedChange={() => toggleSelectOne(product.slug!)}
                                             aria-label={`Select product ${product.name}`}
                                         />
                                     </TableCell>
-                                    <TableCell className="w-10 px-2 font-medium">{index + 1}</TableCell>
+                                    <TableCell className="w-10 px-2 font-medium">
+                                        {index + 1}
+                                    </TableCell>
                                     <TableCell className="px-2">{product.name}</TableCell>
                                     <TableCell className="px-2">{product.price}</TableCell>
-                                    <TableCell className="px-2">{product.brand?.name || '—'}</TableCell>
                                     <TableCell className="px-2">
-                                        {product.categories_list || '—'}
+                                        {product.brand?.name || '—'}
+                                    </TableCell>
+                                    <TableCell className="px-2">
+                                        {product.categories_list ||
+                                            product.categories?.map(c => c.name).join(', ') ||
+                                            '—'}
                                     </TableCell>
                                     <TableCell className="px-2">{product.quantity}</TableCell>
-
                                     <TableCell className="px-2 w-24">
                                         {product.is_active ? (
                                             <span className="text-green-600">Active</span>
@@ -130,11 +159,18 @@ export default function Index({ products }) {
                                         )}
                                     </TableCell>
                                     <TableCell className="text-right px-2 w-28 space-x-2">
-                                        <Link href={`/dashboard/products/${product?.slug}/edit`}>
-                                            <Button size="sm" variant="outline">Edit</Button>
+                                        <Link href={`/dashboard/products/${product.slug}/edit`}>
+                                            <Button size="sm" variant="outline">
+                                                Edit
+                                            </Button>
                                         </Link>
-                                        {/* create delete functionality here */}
-                                        <Button size="sm" variant="destructive" onClick={() => handleDelete(product?.slug)}>Delete</Button>
+                                        <Button
+                                            size="sm"
+                                            variant="destructive"
+                                            onClick={() => handleDelete(product.slug!)}
+                                        >
+                                            Delete
+                                        </Button>
                                     </TableCell>
                                 </TableRow>
                             ))}
