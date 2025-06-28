@@ -38,7 +38,7 @@ return new class extends Migration {
             $table->text('meta_keywords')->nullable();
 
             // Physical properties
-            $table->decimal('weight', 8, 2)->nullable(); // e.g., in KG or LB
+            $table->string('weight')->nullable(); // e.g., in KG or LB
             $table->string('dimensions')->nullable(); // e.g., "10x20x15 cm"
 
             $table->timestamps();

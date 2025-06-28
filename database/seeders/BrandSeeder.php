@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Brand;
+use Illuminate\Support\Str;
+
 class BrandSeeder extends Seeder
 {
     /**
@@ -12,10 +13,30 @@ class BrandSeeder extends Seeder
      */
     public function run(): void
     {
-         Brand::insert([
-            ['name' => 'Apple', 'slug' => 'apple', 'is_active' => true],
-            ['name' => 'Samsung', 'slug' => 'samsung', 'is_active' => true],
-            ['name' => 'Sony', 'slug' => 'sony', 'is_active' => true],
-        ]);
+        $brands = [
+            'Nike',
+            'Adidas',
+            'Puma',
+            'Reebok',
+            'New Balance',
+            'Converse',
+            'Skechers',
+            'Under Armour',
+            'ASICS',
+            'Vans',
+            'Timberland',
+            'Clarks',
+            'Bata',
+            'Hush Puppies',
+            'Woodland',
+        ];
+
+        foreach ($brands as $brand) {
+            Brand::create([
+                'name' => $brand,
+                'slug' => Str::slug($brand),
+                'is_active' => true,
+            ]);
+        }
     }
 }

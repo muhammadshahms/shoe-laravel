@@ -56,7 +56,7 @@ export const baseProductSchema = z.object({
   meta_title: z.string().optional(),
   meta_description: z.string().optional(),
   meta_keywords: z.string().optional(),
-  weight: z.coerce.number().nullable().optional(),
+  weight: z.string().optional(),
   dimensions: z.string().optional(),
   categories: z
     .array(
