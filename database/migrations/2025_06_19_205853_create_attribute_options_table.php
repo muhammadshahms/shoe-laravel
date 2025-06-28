@@ -10,8 +10,8 @@ return new class extends Migration {
         Schema::create('attribute_options', function (Blueprint $table) {
             $table->id();
             $table->foreignId('attribute_id')
-                  ->constrained('attributes')
-                  ->onDelete('cascade');
+                ->constrained('attributes')
+                ->onDelete('cascade');
             $table->string('value');
             $table->string('label');
             $table->timestamps();

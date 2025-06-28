@@ -2,64 +2,64 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Str;
 use App\Models\Attribute;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class AttributeController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $attributes = Attribute::withCount('options')->get();
+
+        return Inertia::render('Attributes/Index', [
+            'attributes' => $attributes,
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return Inertia::render('Attributes/Create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $validated['code'] = Str::slug($validated['name']);
+
+        Attribute::create($validated);
+
+        return redirect()->route('attributes.index')->with('success', 'Attribute created.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Attribute $attribute)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Attribute $attribute)
     {
-        //
+        return Inertia::render('Attributes/Edit', [
+            'attribute' => $attribute,
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Attribute $attribute)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $validated['code'] = Str::slug($validated['name']);
+
+        $attribute->update($validated);
+
+        return redirect()->route('attributes.index')->with('success', 'Attribute updated.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Attribute $attribute)
     {
-        //
+        $attribute->delete();
+
+        return redirect()->route('attributes.index')->with('success', 'Attribute deleted.');
     }
 }

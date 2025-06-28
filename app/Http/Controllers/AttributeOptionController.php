@@ -2,64 +2,69 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Attribute;
 use App\Models\AttributeOption;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class AttributeOptionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Attribute $attribute)
     {
-        //
+        $options = $attribute->options()->get();
+
+        return Inertia::render('AttributeOptions/Index', [
+            'attribute' => $attribute,
+            'options' => $options,
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function create(Attribute $attribute)
     {
-        //
+        return Inertia::render('AttributeOptions/Create', [
+            'attribute' => $attribute,
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(Request $request, Attribute $attribute)
     {
-        //
+        $validated = $request->validate([
+            'value' => 'required|string|max:255',
+            'label' => 'required|string|max:255',
+        ]);
+
+        $attribute->options()->create($validated);
+
+        return redirect()->route('attributes.options.index', $attribute->id)
+            ->with('success', 'Option created.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(AttributeOption $attributeOption)
+    public function edit(Attribute $attribute, AttributeOption $option)
     {
-        //
+        return Inertia::render('AttributeOptions/Edit', [
+            'attribute' => $attribute,
+            'option' => $option,
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(AttributeOption $attributeOption)
+    public function update(Request $request, Attribute $attribute, AttributeOption $option)
     {
-        //
+        $validated = $request->validate([
+            'value' => 'required|string|max:255',
+            'label' => 'required|string|max:255',
+        ]);
+
+        $option->update($validated);
+
+        return redirect()->route('attributes.options.index', $attribute->id)
+            ->with('success', 'Option updated.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, AttributeOption $attributeOption)
+    public function destroy(Attribute $attribute, AttributeOption $option)
     {
-        //
-    }
+        $option->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(AttributeOption $attributeOption)
-    {
-        //
+        return redirect()->route('attributes.options.index', $attribute->id)
+            ->with('success', 'Option deleted.');
     }
 }
