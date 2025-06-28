@@ -20,11 +20,11 @@ import Pagination from '@/components/pagination';
 import { Product } from '@/types/product';
 
 interface ProductIndexProps {
-  products: {
-    data: Product[];
-    meta: any;
-    links: any;
-  };
+    products: {
+        data: Product[];
+        meta: any;
+        links: any;
+    };
 }
 
 export default function Index({ products }: ProductIndexProps) {
@@ -176,8 +176,11 @@ export default function Index({ products }: ProductIndexProps) {
                             ))}
                         </TableBody>
                     </Table>
-                    <Pagination meta={products.meta} links={products.links} />
                 </Card>
+                <div className='flex justify-end'>
+                    <Pagination meta={products.meta} links={products.links} />
+                </div>
+
             </div>
         </AppLayout>
     );
