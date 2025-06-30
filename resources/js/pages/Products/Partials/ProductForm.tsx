@@ -1,570 +1,368 @@
-import React, { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+'use client';
+
+import React from 'react';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { router } from '@inertiajs/react';
-import * as z from 'zod';
-import { Label } from '@/components/ui/label';
+import { z } from 'zod';
+
+import {
+    Form,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormControl,
+    FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { 
-    Category, 
-    Product, 
-    Props, 
-    baseProductSchema, 
-    updateProductSchema, 
-    createProductSchema 
-} from '@/validations/product-schema';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+    Select,
+    SelectTrigger,
+    SelectContent,
+    SelectItem,
+    SelectValue,
+} from '@/components/ui/select';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
-// Updated Props interface to match the schema
-interface ProductFormProps {
-    product?: Product;
-    brands: Array<{ id: number; name: string }>;
-    categories: Array<{ 
-        id: number; 
-        name: string; 
-        children: Array<{ id: number; name: string }> 
-    }>;
-    main_image_url?: string;
-    gallery_urls?: string[];
-}
+const productSchema = z.object({
+    name: z.string().min(1, 'Product name is required'),
 
-export default function ProductForm({ 
-    product, 
-    brands, 
-    categories, 
-    main_image_url = '', 
-    gallery_urls = [] 
+    // Price and quantity must not be empty, must be numbers ≥ 0
+    price: z
+        .preprocess((val) => (val === '' ? undefined : Number(val)), z
+            .number({ invalid_type_error: 'Price is required' })
+            .min(0, 'Price must be at least 0')),
+
+    quantity: z
+        .preprocess((val) => (val === '' ? undefined : Number(val)), z
+            .number({ invalid_type_error: 'Quantity is required' })
+            .min(0, 'Quantity must be at least 0')),
+
+
+    description: z.string().optional(),
+    short_description: z.string().optional(),
+    sku: z.string().optional(),
+    barcode: z.string().optional(),
+    brand_id: z.string().optional(),
+    special_price: z.coerce.number().min(0).optional(),
+    special_price_start: z.string().optional(),
+    special_price_end: z.string().optional(),
+    in_stock: z.boolean().default(false),
+    is_active: z.boolean().default(true),
+    is_featured: z.boolean().default(false),
+    meta_title: z.string().optional(),
+    meta_description: z.string().optional(),
+    meta_keywords: z.string().optional(),
+    weight: z.string().optional(),
+    dimensions: z.string().optional(),
+    category_ids: z.array(z.string()).optional(),
+});
+
+type ProductFormProps = {
+    product?: any;
+    categories: any[];
+    brands: { id: number; name: string }[];
+    onSubmit: (data: any) => void;
+};
+
+export default function ProductForm({
+    product,
+    categories,
+    brands,
+    onSubmit,
 }: ProductFormProps) {
-    const [mainImage, setMainImage] = useState<File | null>(null);
-    const [gallery, setGallery] = useState<File[]>([]);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    
-    const isEditing = Boolean(product?.id);
-    
-    // Fix: Proper default values function
-    function getDefaultProductValues(product?: Product): Partial<Product> {
-        if (!product) {
-            return {
-                name: '',
-                price: undefined,
-                quantity: undefined,
-                brand: undefined,
-                categories: [],
-                in_stock: false,
-                is_active: true,
-                is_featured: false,
-            };
-        }
-        
-        return {
-            ...product,
-            price: product.price ?? undefined,
-            quantity: product.quantity ?? undefined,
-            brand: product.brand ? { id: product.brand.id } : undefined,
-            categories: product.categories || [],
-            in_stock: product.in_stock ?? false,
-            is_active: product.is_active ?? true,
-            is_featured: product.is_featured ?? false,
-            special_price: product.special_price ?? undefined,
-            special_price_start: product.special_price_start ?? undefined,
-            special_price_end: product.special_price_end ?? undefined,
-        };
-    }
-
-    // Fix: Use correct schema based on edit/create mode
-    const {
-        register,
-        handleSubmit,
-        control,
-        formState: { errors },
-    } = useForm<Product>({
-        resolver: zodResolver(isEditing ? updateProductSchema : createProductSchema),
-        defaultValues: getDefaultProductValues(product),
+    const form = useForm({
+        resolver: zodResolver(productSchema),
+        defaultValues: {
+            name: product?.name || '',
+            price: product?.price?.toString() || '',         // ← Make string, not 0
+            quantity: product?.quantity?.toString() || '',   // ← Make string, not 0
+            description: product?.description || '',
+            short_description: product?.short_description || '',
+            sku: product?.sku || '',
+            barcode: product?.barcode || '',
+            brand_id: product?.brand_id?.toString() || '',
+            special_price: product?.special_price || undefined,
+            special_price_start: product?.special_price_start || '',
+            special_price_end: product?.special_price_end || '',
+            in_stock: product?.in_stock || false,
+            is_active: product?.is_active || true,
+            is_featured: product?.is_featured || false,
+            meta_title: product?.meta_title || '',
+            meta_description: product?.meta_description || '',
+            meta_keywords: product?.meta_keywords || '',
+            weight: product?.weight || '',
+            dimensions: product?.dimensions || '',
+            category_ids:
+                product?.categories?.map((cat: any) => cat.id.toString()) || [],
+        },
     });
 
-    // Fix: Proper form submission with correct data handling
-    const onSubmit = (data: Product) => {
-        const formData = new FormData();
-        
-        // Add method override for updates
-        if (isEditing && product?.id) {
-            formData.append('_method', 'PUT');
-        }
+    const selectedCategories = form.watch('category_ids') || [];
 
-        // Handle all form fields
-        Object.entries(data).forEach(([key, value]) => {
-            if (value === undefined || value === null) return;
-
-            switch (key) {
-                case 'brand':
-                    if (value && typeof value === 'object' && 'id' in value) {
-                        formData.append('brand_id', value.id.toString());
-                    }
-                    break;
-                    
-                case 'categories':
-                    if (Array.isArray(value)) {
-                        value.forEach((category) => {
-                            if (category && typeof category === 'object' && 'id' in category) {
-                                formData.append('categories[]', category.id.toString());
-                            }
-                        });
-                    }
-                    break;
-                    
-                case 'in_stock':
-                case 'is_active':
-                case 'is_featured':
-                    formData.append(key, value ? '1' : '0');
-                    break;
-                    
-                case 'price':
-                case 'special_price':
-                case 'quantity':
-                case 'weight':
-                    if (typeof value === 'number') {
-                        formData.append(key, value.toString());
-                    } else if (typeof value === 'string' && value.trim() !== '') {
-                        formData.append(key, value);
-                    }
-                    break;
-                    
-                default:
-                    if (typeof value === 'string' || typeof value === 'number') {
-                        formData.append(key, String(value));
-                    }
-                    break;
-            }
-        });
-
-        // Handle file uploads
-        if (mainImage) {
-            formData.append('main_image', mainImage);
-        }
-        
-        gallery.forEach((file, index) => {
-            formData.append(`gallery[${index}]`, file);
-        });
-
-        // Fix: Correct URL construction for updates
-        const url = isEditing && product?.slug 
-            ? `/dashboard/products/${product.slug}` 
-            : '/dashboard/products';
-
-        setIsSubmitting(true);
-        
-        router.visit(url, {
-            method: 'post',
-            data: formData,
-            forceFormData: true,
-            onSuccess: (page) => {
-                console.log('Product saved successfully', page);
-                // Reset file inputs
-                setMainImage(null);
-                setGallery([]);
-            },
-            onError: (errors) => {
-                console.error('Validation errors:', errors);
-            },
-            onFinish: () => {
-                setIsSubmitting(false);
-            }
-        });
+    const toggleCategory = (id: string) => {
+        const current = new Set(selectedCategories);
+        current.has(id) ? current.delete(id) : current.add(id);
+        form.setValue('category_ids', Array.from(current));
     };
 
     return (
-        <div className="max-w-6xl mx-auto p-6">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-                {/* Basic Product Information */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border">
-                    <h2 className="text-lg font-semibold mb-4">Basic Information</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Product Name *</Label>
-                            <Input 
-                                id="name" 
-                                placeholder="e.g. Red Leather Wallet" 
-                                {...register('name')} 
+        <Form {...form}>
+            <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-6"
+                encType="multipart/form-data"
+            >
+                <Tabs defaultValue="general" className="w-full">
+                    <TabsList className="mb-4">
+                        <TabsTrigger value="general">General</TabsTrigger>
+                        <TabsTrigger value="seo">SEO</TabsTrigger>
+                    </TabsList>
+
+                    {/* ------------------- GENERAL ------------------- */}
+                    <TabsContent value="general" className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="name"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            Product Name <span className="text-red-500">*</span>
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
                             />
-                            <p className="text-xs text-muted-foreground">Enter a unique product name</p>
-                            {errors.name && (
-                                <p className="text-sm text-red-500">{errors.name.message}</p>
-                            )}
-                        </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="sku">SKU</Label>
-                            <Input 
-                                id="sku" 
-                                placeholder="e.g. RED-WALLET-001" 
-                                {...register('sku')} 
+
+                            <FormField
+                                control={form.control}
+                                name="price"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            Price <span className="text-red-500">*</span>
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input type="number" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
                             />
-                            <p className="text-xs text-muted-foreground">Stock Keeping Unit (optional)</p>
-                        </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="barcode">Barcode</Label>
-                            <Input 
-                                id="barcode" 
-                                placeholder="e.g. 1234567890123" 
-                                {...register('barcode')} 
-                            />
-                        </div>
 
-                        <div className="space-y-2">
-                            <Label>Brand</Label>
-                            <Controller
-                                control={control}
-                                name="brand"
-                                render={({ field }) => {
-                                    // Debug logging
-                                    console.log('Brand field value:', field.value);
-                                    console.log('Brands array:', brands);
-                                    
-                                    const currentValue = field.value?.id ? String(field.value.id) : "null";
-                                    
-                                    return (
-                                        <Select
-                                            value={currentValue}
-                                            onValueChange={(val) => {
-                                                console.log('Selected value:', val);
-                                                if (val === "null") {
-                                                    field.onChange(undefined);
-                                                } else {
-                                                    field.onChange({ id: parseInt(val) });
-                                                }
-                                            }}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select brand" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="null">No brand</SelectItem>
-                                                {brands && brands.length > 0 ? brands.map((brand) => (
-                                                    <SelectItem 
-                                                        key={`brand-${brand.id}`} 
-                                                        value={String(brand.id)}
-                                                    >
-                                                        {brand.name}
-                                                    </SelectItem>
-                                                )) : (
-                                                    <SelectItem value="loading" disabled>Loading brands...</SelectItem>
-                                                )}
-                                            </SelectContent>
-                                        </Select>
-                                    );
-                                }}
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                {/* Pricing & Inventory */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border">
-                    <h2 className="text-lg font-semibold mb-4">Pricing & Inventory</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="price">Price *</Label>
-                            <Input 
-                                id="price" 
-                                type="number" 
-                                step="0.01" 
-                                placeholder="e.g. 499.99" 
-                                {...register('price', { valueAsNumber: true })} 
-                            />
-                            {errors.price && (
-                                <p className="text-sm text-red-500">{errors.price.message}</p>
-                            )}
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="special_price">Special Price</Label>
-                            <Input 
-                                id="special_price" 
-                                type="number" 
-                                step="0.01" 
-                                placeholder="e.g. 399.99" 
-                                {...register('special_price', { valueAsNumber: true })} 
-                            />
-                            {errors.special_price && (
-                                <p className="text-sm text-red-500">{errors.special_price.message}</p>
-                            )}
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="quantity">Quantity *</Label>
-                            <Input 
-                                id="quantity" 
-                                type="number" 
-                                placeholder="e.g. 100" 
-                                {...register('quantity', { valueAsNumber: true })} 
-                            />
-                            {errors.quantity && (
-                                <p className="text-sm text-red-500">{errors.quantity.message}</p>
-                            )}
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="special_price_start">Special Price Start</Label>
-                            <Input 
-                                id="special_price_start" 
-                                type="date" 
-                                {...register('special_price_start')} 
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="special_price_end">Special Price End</Label>
-                            <Input 
-                                id="special_price_end" 
-                                type="date" 
-                                {...register('special_price_end')} 
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="weight">Weight (kg)</Label>
-                            <Input 
-                                id="weight" 
-                                type="number" 
-                                step="0.01" 
-                                placeholder="e.g. 1.25" 
-                                {...register('weight')} 
-                            />
-                        </div>
-                    </div>
-
-                    <div className="mt-4">
-                        <Label htmlFor="dimensions">Dimensions</Label>
-                        <Input 
-                            id="dimensions" 
-                            placeholder="e.g. 10x20x30 cm" 
-                            {...register('dimensions')} 
-                        />
-                    </div>
-                </div>
-
-                {/* Product Description */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border">
-                    <h2 className="text-lg font-semibold mb-4">Description</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="description">Description</Label>
-                            <Textarea 
-                                id="description" 
-                                placeholder="Detailed product description..." 
-                                rows={4}
-                                {...register('description')} 
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="short_description">Short Description</Label>
-                            <Textarea 
-                                id="short_description" 
-                                placeholder="Brief product summary..." 
-                                rows={4}
-                                {...register('short_description')} 
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                {/* Categories */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border">
-                    <h2 className="text-lg font-semibold mb-4">Categories</h2>
-                    <div className="space-y-6">
-                        {categories.map((parent) => (
-                            <div key={parent.id}>
-                                <h3 className="font-medium text-sm text-gray-700 mb-3">{parent.name}</h3>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 ml-4">
-                                    {parent.children?.map((child) => (
-                                        <Controller
-                                            key={child.id}
-                                            control={control}
-                                            name="categories"
-                                            render={({ field }) => {
-                                                const currentCategories = field.value || [];
-                                                const isChecked = currentCategories.some(c => c.id === child.id);
-
-                                                const handleChange = (checked: boolean) => {
-                                                    let newCategories = [...currentCategories];
-                                                    
-                                                    if (checked) {
-                                                        newCategories.push({ id: child.id });
-                                                    } else {
-                                                        newCategories = newCategories.filter(c => c.id !== child.id);
-                                                    }
-                                                    
-                                                    field.onChange(newCategories);
-                                                };
-
-                                                return (
-                                                    <div className="flex items-center space-x-2">
-                                                        <Checkbox
-                                                            id={`category-${child.id}`}
-                                                            checked={isChecked}
-                                                            onCheckedChange={handleChange}
-                                                        />
-                                                        <Label 
-                                                            htmlFor={`category-${child.id}`} 
-                                                            className="text-sm font-normal cursor-pointer"
+                            <FormField
+                                control={form.control}
+                                name="brand_id"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Brand</FormLabel>
+                                        <FormControl>
+                                            <Select
+                                                value={field.value}
+                                                onValueChange={field.onChange}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select brand" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {brands.map((brand) => (
+                                                        <SelectItem
+                                                            key={brand.id}
+                                                            value={brand.id.toString()}
                                                         >
-                                                            {child.name}
-                                                        </Label>
-                                                    </div>
-                                                );
-                                            }}
-                                        />
-                                    ))}
-                                </div>
+                                                            {brand.name}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="quantity"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            Quantity <span className="text-red-500">*</span>
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input type="number" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="special_price"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Special Price</FormLabel>
+                                        <FormControl>
+                                            <Input type="number" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+
+                        <FormField
+                            control={form.control}
+                            name="description"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Description</FormLabel>
+                                    <FormControl>
+                                        <Textarea rows={4} {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <div>
+                            <FormLabel>Categories</FormLabel>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+                                {categories.map((parent) => (
+                                    <div key={parent.id}>
+                                        <div className="font-medium">{parent.name}</div>
+                                        {parent.children.map((child: any) => (
+                                            <div
+                                                key={child.id}
+                                                className="flex items-center space-x-2"
+                                            >
+                                                <Checkbox
+                                                    id={`cat-${child.id}`}
+                                                    checked={selectedCategories.includes(
+                                                        child.id.toString()
+                                                    )}
+                                                    onCheckedChange={() =>
+                                                        toggleCategory(child.id.toString())
+                                                    }
+                                                />
+                                                <label
+                                                    htmlFor={`cat-${child.id}`}
+                                                    className="text-sm"
+                                                >
+                                                    {child.name}
+                                                </label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
-                </div>
+                        </div>
 
-                {/* Product Status */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border">
-                    <h2 className="text-lg font-semibold mb-4">Product Status</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                        <Controller
-                            name="in_stock"
-                            control={control}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <FormLabel>Main Image</FormLabel>
+                                <Input type="file" name="main_image" />
+                            </div>
+                            <div>
+                                <FormLabel>Gallery</FormLabel>
+                                <Input type="file" name="gallery[]" multiple />
+                            </div>
+                        </div>
+
+                        <div className="flex gap-4 mt-4">
+                            {['is_active', 'is_featured', 'in_stock'].map((fieldName) => (
+                                <FormField
+                                    key={fieldName}
+                                    control={form.control}
+                                    name={fieldName as any}
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-row items-start space-x-2 space-y-0">
+                                            <FormControl>
+                                                <Checkbox
+                                                    checked={field.value}
+                                                    onCheckedChange={field.onChange}
+                                                />
+                                            </FormControl>
+                                            <FormLabel className="font-normal capitalize">
+                                                {fieldName.replace('_', ' ')}
+                                            </FormLabel>
+                                        </FormItem>
+                                    )}
+                                />
+                            ))}
+                        </div>
+                    </TabsContent>
+
+                    {/* ------------------- SEO ------------------- */}
+                    <TabsContent value="seo" className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="meta_title"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Meta Title</FormLabel>
+                                        <FormControl>
+                                            <Input {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="slug"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Slug</FormLabel>
+                                        <FormControl>
+                                            <Input {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                        <FormField
+                            control={form.control}
+                            name="meta_description"
                             render={({ field }) => (
-                                <div className="flex items-center space-x-2">
-                                    <Checkbox 
-                                        id="in_stock"
-                                        checked={field.value || false} 
-                                        onCheckedChange={field.onChange} 
-                                    />
-                                    <Label htmlFor="in_stock" className="cursor-pointer">In Stock</Label>
-                                </div>
+                                <FormItem>
+                                    <FormLabel>Meta Description</FormLabel>
+                                    <FormControl>
+                                        <Textarea rows={4} {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
                             )}
                         />
-                        <Controller
-                            name="is_active"
-                            control={control}
+                        <FormField
+                            control={form.control}
+                            name="meta_keywords"
                             render={({ field }) => (
-                                <div className="flex items-center space-x-2">
-                                    <Checkbox 
-                                        id="is_active"
-                                        checked={field.value || false} 
-                                        onCheckedChange={field.onChange} 
-                                    />
-                                    <Label htmlFor="is_active" className="cursor-pointer">Active</Label>
-                                </div>
+                                <FormItem>
+                                    <FormLabel>Meta Keywords</FormLabel>
+                                    <FormControl>
+                                        <Input {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
                             )}
                         />
-                        <Controller
-                            name="is_featured"
-                            control={control}
-                            render={({ field }) => (
-                                <div className="flex items-center space-x-2">
-                                    <Checkbox 
-                                        id="is_featured"
-                                        checked={field.value || false} 
-                                        onCheckedChange={field.onChange} 
-                                    />
-                                    <Label htmlFor="is_featured" className="cursor-pointer">Featured</Label>
-                                </div>
-                            )}
-                        />
-                    </div>
-                </div>
+                    </TabsContent>
+                </Tabs>
 
-                {/* SEO Metadata */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border">
-                    <h2 className="text-lg font-semibold mb-4">SEO Metadata</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="meta_title">Meta Title</Label>
-                            <Input 
-                                id="meta_title" 
-                                placeholder="SEO title for search engines" 
-                                {...register('meta_title')} 
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="meta_keywords">Meta Keywords</Label>
-                            <Input 
-                                id="meta_keywords" 
-                                placeholder="comma, separated, keywords" 
-                                {...register('meta_keywords')} 
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="meta_description">Meta Description</Label>
-                            <Textarea 
-                                id="meta_description" 
-                                placeholder="Brief description for search engines" 
-                                rows={3}
-                                {...register('meta_description')} 
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                {/* Images */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border">
-                    <h2 className="text-lg font-semibold mb-4">Images</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="main_image">Main Image</Label>
-                            <Input 
-                                id="main_image"
-                                type="file" 
-                                accept="image/*"
-                                onChange={(e) => setMainImage(e.target.files?.[0] || null)} 
-                            />
-                            {main_image_url && (
-                                <div className="mt-2">
-                                    <img 
-                                        src={main_image_url} 
-                                        alt="Current main image" 
-                                        className="w-24 h-24 object-cover rounded border" 
-                                    />
-                                </div>
-                            )}
-                        </div>
-                        
-                        <div className="space-y-2">
-                            <Label htmlFor="gallery">Gallery Images</Label>
-                            <Input 
-                                id="gallery"
-                                type="file" 
-                                accept="image/*"
-                                multiple 
-                                onChange={(e) => setGallery(e.target.files ? Array.from(e.target.files) : [])} 
-                            />
-                            {gallery_urls && gallery_urls.length > 0 && (
-                                <div className="flex flex-wrap gap-2 mt-2">
-                                    {gallery_urls.map((url, index) => (
-                                        <img 
-                                            key={index} 
-                                            src={url} 
-                                            alt={`Gallery image ${index + 1}`} 
-                                            className="w-16 h-16 object-cover rounded border" 
-                                        />
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Submit Button */}
-                <div className="flex justify-end">
-                    <Button 
-                        type="submit" 
-                        className="px-8 py-2" 
-                        disabled={isSubmitting}
-                    >
-                        {isSubmitting ? 'Processing...' : (isEditing ? 'Update Product' : 'Create Product')}
-                    </Button>
-                </div>
+                <Button type="submit">Save</Button>
             </form>
-        </div>
+        </Form>
     );
 }

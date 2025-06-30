@@ -44,7 +44,7 @@ class ProductController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'slug' => 'sometimes|string|unique:products,slug,' . ($product->id ?? 'null'),
+            'slug' => 'nullable|string|unique:products,slug',
             'description' => 'nullable|string',
             'short_description' => 'nullable|string',
 
@@ -111,7 +111,7 @@ class ProductController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'slug' => 'sometimes|string|unique:products,slug,' . ($product->id ?? 'null'), // update: ignore current id
+            'slug' => 'nullable|string|unique:products,slug',
             'description' => 'nullable|string',
             'short_description' => 'nullable|string',
 

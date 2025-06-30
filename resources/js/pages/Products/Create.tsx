@@ -1,14 +1,20 @@
-import React from 'react';
-import ProductForm from './Partials/ProductForm';
 import AppLayout from '@/layouts/app-layout';
-import { Props } from '@/validations/product-schema';
+import ProductForm from './Partials/ProductForm';
+import { router } from '@inertiajs/react';
 
-export default function Create({ brands, categories }: Props) {
+export default function Create({ brands, categories }) {
     return (
         <AppLayout>
             <div className="p-6">
-                <h1 className="text-2xl font-bold mb-4">Create Product</h1>
-                <ProductForm brands={brands} categories={categories} />
+
+                <h2 className="text-2xl font-bold mb-4">Create Product</h2>
+                <ProductForm
+                    brands={brands}
+                    categories={categories}
+                    onSubmit={(data) => {
+                        router.post('/dashboard/products', data);
+                    }}
+                />
             </div>
         </AppLayout>
     );
