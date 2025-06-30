@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->text('description')->nullable();
             $table->text('short_description')->nullable();
 
-            $table->string('sku')->unique()->nullable();
+            $table->string('sku')->nullable();
             $table->string('barcode')->nullable();
 
             $table->foreignId('brand_id')->nullable()->constrained('brands')->nullOnDelete();

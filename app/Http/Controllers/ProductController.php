@@ -44,29 +44,40 @@ class ProductController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
+            'slug' => 'sometimes|string|unique:products,slug,' . ($product->id ?? 'null'),
             'description' => 'nullable|string',
-            'short_description' => 'nullable|string|max:255',
-            'sku' => 'nullable|string|max:100',
-            'barcode' => 'nullable|string|max:100',
+            'short_description' => 'nullable|string',
+
+            'sku' => 'nullable|string|max:255',
+            'barcode' => 'nullable|string|max:255',
+
             'brand_id' => 'nullable|exists:brands,id',
+
             'price' => 'required|numeric|min:0',
             'special_price' => 'nullable|numeric|min:0',
             'special_price_start' => 'nullable|date',
             'special_price_end' => 'nullable|date',
+
             'quantity' => 'required|integer|min:0',
             'in_stock' => 'boolean',
+
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
+
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
             'meta_keywords' => 'nullable|string',
-            'weight' => 'nullable|numeric',
+
+            'weight' => 'nullable|string|max:255',
             'dimensions' => 'nullable|string|max:255',
-            'category_ids' => 'array',
+
+            'category_ids' => 'sometimes|array',
             'category_ids.*' => 'exists:categories,id',
+
             'main_image' => 'nullable|image|max:2048',
             'gallery.*' => 'nullable|image|max:2048',
         ]);
+
 
         $product = Product::create($data);
 
@@ -100,29 +111,40 @@ class ProductController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
+            'slug' => 'sometimes|string|unique:products,slug,' . ($product->id ?? 'null'), // update: ignore current id
             'description' => 'nullable|string',
-            'short_description' => 'nullable|string|max:255',
-            'sku' => 'nullable|string|max:100',
-            'barcode' => 'nullable|string|max:100',
+            'short_description' => 'nullable|string',
+
+            'sku' => 'nullable|string|max:255',
+            'barcode' => 'nullable|string|max:255',
+
             'brand_id' => 'nullable|exists:brands,id',
+
             'price' => 'required|numeric|min:0',
             'special_price' => 'nullable|numeric|min:0',
             'special_price_start' => 'nullable|date',
             'special_price_end' => 'nullable|date',
+
             'quantity' => 'required|integer|min:0',
             'in_stock' => 'boolean',
+
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
+
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
             'meta_keywords' => 'nullable|string',
-            'weight' => 'nullable|numeric',
+
+            'weight' => 'nullable|string|max:255',
             'dimensions' => 'nullable|string|max:255',
-            'category_ids' => 'array',
+
+            'category_ids' => 'sometimes|array',
             'category_ids.*' => 'exists:categories,id',
+
             'main_image' => 'nullable|image|max:2048',
             'gallery.*' => 'nullable|image|max:2048',
         ]);
+
 
         $product->update($data);
 

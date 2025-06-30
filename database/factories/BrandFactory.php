@@ -3,21 +3,36 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
+use App\Models\Brand;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Brand>
+ * @extends Factory<Brand>
  */
 class BrandFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = Brand::class;
+
     public function definition(): array
     {
+        $name = $this->faker->unique()->company;
+
         return [
-            //
+            'name' => $name,
+            'slug' => Str::slug($name),
+            'description' => $this->faker->sentence,
+            'website' => $this->faker->url,
+            'position' => $this->faker->numberBetween(1, 100),
+            'is_active' => $this->faker->boolean(90),
         ];
+    }
+
+    public function configure()
+    {
+        return $this->afterCreating(function (Brand $brand) {
+            // Seed logo image from placeholder
+            $brand->addMediaFromUrl('https://loremflickr.com/200/200/logo')
+                ->toMediaCollection('logo');
+        });
     }
 }

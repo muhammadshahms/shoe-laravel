@@ -1,8 +1,9 @@
 import React from 'react';
 import ProductForm from './Partials/ProductForm';
 import AppLayout from '@/layouts/app-layout';
+import { Props } from '@/validations/product-schema';
 
-export default function Create({ brands, categories }) {
+export default function Create({ brands, categories }: Props) {
     return (
         <AppLayout>
             <div className="p-6">

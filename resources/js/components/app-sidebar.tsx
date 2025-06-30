@@ -17,8 +17,23 @@ const mainNavItems: NavItem[] = [
         title: 'Products',
         href: '/dashboard/products',
         icon: Box,
+        children: [
+            {
+                title: 'Variants',
+                href: '/dashboard/products/variants/',
+            },
+            {
+                title: 'Categories',
+                href: '/dashboard/products/categories',
+            },
+            {
+                title: 'Attributes',
+                href: '/dashboard/products/attributes',
+            },
+        ],
     },
 ];
+
 
 const footerNavItems: NavItem[] = [
     // {

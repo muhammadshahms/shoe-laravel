@@ -32,8 +32,8 @@ export const baseProductSchema = z.object({
   special_price: z.preprocess(
     (val) => {
       if (val === '' || val === null || val === undefined) return undefined;
-      if (typeof val === 'number' && isNaN(val)) return undefined;
-      return val;
+      const num = Number(val);
+      return isNaN(num) ? undefined : num;
     },
     z.number().positive("Special price must be greater than zero").optional()
   ).nullable().optional(),
@@ -71,9 +71,7 @@ export const createProductSchema = baseProductSchema.extend({
   // Additional creation-specific validations if any
 });
 
-export const updateProductSchema = baseProductSchema.partial().extend({
-  // For update, all fields optional but validated if provided
-});
+export const updateProductSchema = baseProductSchema.partial();
 
 // ✅ Props schema for page validation
 
@@ -81,8 +79,8 @@ export const propsSchema = z.object({
   product: baseProductSchema.optional(),
   brands: z.array(brandSchema),
   categories: z.array(categorySchema),
-  mainImageUrl: z.string().optional(),
-  galleryUrls: z.array(z.string()).optional(),
+  main_image_url: z.string().optional(),
+  gallery_urls: z.array(z.string()).optional(),
 });
 
 // ✅ TypeScript inference
