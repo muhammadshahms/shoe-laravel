@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -58,12 +58,16 @@ const productSchema = z.object({
     weight: z.string().optional(),
     dimensions: z.string().optional(),
     category_ids: z.array(z.string()).optional(),
+    main_image: z.any().optional(),
+    gallery: z.any().optional(),
 });
 
 type ProductFormProps = {
     product?: any;
     categories: any[];
     brands: { id: number; name: string }[];
+    main_image_url: string;
+    gallery_urls: any[];
     onSubmit: (data: any) => void;
 };
 
@@ -71,8 +75,11 @@ export default function ProductForm({
     product,
     categories,
     brands,
+    main_image_url,
+    gallery_urls,
     onSubmit,
 }: ProductFormProps) {
+
     const form = useForm({
         resolver: zodResolver(productSchema),
         defaultValues: {
@@ -95,6 +102,10 @@ export default function ProductForm({
             meta_keywords: product?.meta_keywords || '',
             weight: product?.weight || '',
             dimensions: product?.dimensions || '',
+            main_image: undefined,
+            gallery: undefined,
+
+
             category_ids:
                 product?.categories?.map((cat: any) => cat.id.toString()) || [],
         },
@@ -150,7 +161,7 @@ export default function ProductForm({
                                             Price <span className="text-red-500">*</span>
                                         </FormLabel>
                                         <FormControl>
-                                            <Input type="number" {...field} />
+                                            <Input type="nuumber" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -269,12 +280,64 @@ export default function ProductForm({
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <FormLabel>Main Image</FormLabel>
-                                <Input type="file" name="main_image" />
+                                <FormField
+                                    control={form.control}
+                                    name="main_image"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Main Image</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={(e) => field.onChange(e.target.files?.[0])}
+                                                />
+                                            </FormControl>
+                                            {main_image_url && (
+                                                <div className="mt-2">
+                                                    <img
+                                                        src={main_image_url}
+                                                        alt="Main Image Preview"
+                                                        className="w-32 h-32 object-cover border rounded"
+                                                    />
+                                                </div>
+                                            )}
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                             </div>
                             <div>
-                                <FormLabel>Gallery</FormLabel>
-                                <Input type="file" name="gallery[]" multiple />
+                                <FormField
+                                    control={form.control}
+                                    name="gallery"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Gallery</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    multiple
+                                                    onChange={(e) => field.onChange(e.target.files)}
+                                                />
+                                            </FormControl>
+                                            {gallery_urls && gallery_urls.length > 0 && (
+                                                <div className="flex gap-2 mt-2 flex-wrap">
+                                                    {gallery_urls.map((url, i) => (
+                                                        <img
+                                                            key={i}
+                                                            src={url}
+                                                            alt={`Gallery Image ${i + 1}`}
+                                                            className="w-20 h-20 object-cover border rounded"
+                                                        />
+                                                    ))}
+                                                </div>
+                                            )}
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                             </div>
                         </div>
 

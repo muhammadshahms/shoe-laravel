@@ -2,7 +2,7 @@ import AppLayout from '@/layouts/app-layout';
 import ProductForm from './Partials/ProductForm';
 import { router } from '@inertiajs/react';
 
-export default function Edit({ product, brands, categories }) {
+export default function Edit({ product, brands, categories, main_image_url, gallery_urls }) {
   return (
     <AppLayout>
       <div className="p-6">
@@ -11,6 +11,8 @@ export default function Edit({ product, brands, categories }) {
           product={product}
           brands={brands}
           categories={categories}
+          main_image_url={main_image_url}
+          gallery_urls={gallery_urls}
           onSubmit={(data) => {
             router.post(`/dashboard/products/${product.slug}`, {
               _method: 'put',

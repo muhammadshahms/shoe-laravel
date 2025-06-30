@@ -37,6 +37,8 @@ class ProductController extends Controller
         return Inertia::render('Products/Create', [
             'brands' => Brand::select('id', 'name')->get(),
             'categories' => Category::with('children')->whereNull('parent_id')->get(),
+            'main_image_url' => null,
+            'gallery_urls' => [],
         ]);
     }
 
