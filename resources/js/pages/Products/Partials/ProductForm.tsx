@@ -25,6 +25,8 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import DeleteAlert from '@/components/Global/DeleteAlert';
+import { X } from 'lucide-react';
 
 const productSchema = z.object({
     name: z.string().min(1, 'Product name is required'),
@@ -59,7 +61,13 @@ const productSchema = z.object({
     dimensions: z.string().optional(),
     category_ids: z.array(z.string()).optional(),
     main_image: z.any().optional(),
-    gallery: z.any().optional(),
+    gallery: z
+        .any()
+        .refine(
+            (files) => !files || files.length <= 8,
+            { message: 'You can upload up to 8 images only.' }
+        )
+        .optional(),
 });
 
 type ProductFormProps = {
@@ -79,7 +87,8 @@ export default function ProductForm({
     gallery_urls,
     onSubmit,
 }: ProductFormProps) {
-
+    const [mainImagePreview, setMainImagePreview] = useState<string | null>(main_image_url || null);
+    const [galleryPreviews, setGalleryPreviews] = useState<string[]>(gallery_urls || []);
     const form = useForm({
         resolver: zodResolver(productSchema),
         defaultValues: {
@@ -112,17 +121,39 @@ export default function ProductForm({
     });
 
     const selectedCategories = form.watch('category_ids') || [];
-
+    const [removedMainImage, setRemovedMainImage] = useState(false);
+    const [removedGalleryIndexes, setRemovedGalleryIndexes] = useState<number[]>([]);
     const toggleCategory = (id: string) => {
         const current = new Set(selectedCategories);
         current.has(id) ? current.delete(id) : current.add(id);
         form.setValue('category_ids', Array.from(current));
     };
+    const handleSubmitForm = (values: any) => {
+        onSubmit({
+            ...values,
+            removedMainImage,
+            removedGalleryIndexes,
+        });
+    };
 
+    const handleImageRemove = () => {
+        setMainImagePreview(null);
+        setRemovedMainImage(true);
+        form.setValue('main_image', undefined);
+    };
+
+    const handleGalleryImageRemove = (i) => {
+        setGalleryPreviews((prev) => prev.filter((_, index) => index !== i));
+        setRemovedGalleryIndexes((prev) => [...prev, i]);
+
+        const galleryFiles = Array.from(form.getValues('gallery') || []);
+        galleryFiles.splice(i, 1);
+        form.setValue('gallery', galleryFiles.length ? galleryFiles : undefined);
+    }
     return (
         <Form {...form}>
             <form
-                onSubmit={form.handleSubmit(onSubmit)}
+                onSubmit={form.handleSubmit(handleSubmitForm)}
                 className="space-y-6"
                 encType="multipart/form-data"
             >
@@ -290,16 +321,33 @@ export default function ProductForm({
                                                 <Input
                                                     type="file"
                                                     accept="image/*"
-                                                    onChange={(e) => field.onChange(e.target.files?.[0])}
+                                                    onChange={(e) => {
+                                                        const file = e.target.files?.[0];
+                                                        if (file) {
+                                                            field.onChange(file);
+                                                            setMainImagePreview(URL.createObjectURL(file));
+                                                        }
+                                                    }}
                                                 />
                                             </FormControl>
-                                            {main_image_url && (
-                                                <div className="mt-2">
+                                            {mainImagePreview && (
+                                                <div className="mt-2 relative w-fit">
                                                     <img
-                                                        src={main_image_url}
+                                                        src={mainImagePreview}
                                                         alt="Main Image Preview"
                                                         className="w-32 h-32 object-cover border rounded"
                                                     />
+
+                                                    <DeleteAlert
+                                                        title="Remove image?"
+                                                        description="Are you sure you want to remove this image?"
+                                                        confirmText="Remove"
+                                                        onConfirm={handleImageRemove}
+                                                        icon={<X className='w-3 h-3' />}
+                                                        triggerClassName="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                                                        isLoading={false}
+                                                    />
+
                                                 </div>
                                             )}
                                             <FormMessage />
@@ -319,21 +367,60 @@ export default function ProductForm({
                                                     type="file"
                                                     accept="image/*"
                                                     multiple
-                                                    onChange={(e) => field.onChange(e.target.files)}
+                                                    disabled={galleryPreviews.length >= 8}
+                                                    onChange={(e) => {
+                                                        const selectedFiles = Array.from(e.target.files || []);
+                                                        const existingPreviews = galleryPreviews.length;
+
+                                                        if (selectedFiles.length + existingPreviews > 8) {
+                                                            form.setError("gallery", {
+                                                                type: "manual",
+                                                                message: "You can upload up to 8 images only.",
+                                                            });
+                                                            return;
+                                                        }
+
+                                                        form.clearErrors("gallery");
+
+                                                        const previews = selectedFiles.map((file) =>
+                                                            URL.createObjectURL(file)
+                                                        );
+                                                        setGalleryPreviews((prev) => [...prev, ...previews]);
+
+                                                        const dt = new DataTransfer();
+                                                        const currentFiles = Array.from(form.getValues("gallery") || []);
+                                                        [...currentFiles, ...selectedFiles].forEach((file) =>
+                                                            dt.items.add(file)
+                                                        );
+                                                        form.setValue("gallery", dt.files, { shouldDirty: true });
+                                                    }}
                                                 />
                                             </FormControl>
-                                            {gallery_urls && gallery_urls.length > 0 && (
+                                            {galleryPreviews.length > 0 && (
                                                 <div className="flex gap-2 mt-2 flex-wrap">
-                                                    {gallery_urls.map((url, i) => (
-                                                        <img
-                                                            key={i}
-                                                            src={url}
-                                                            alt={`Gallery Image ${i + 1}`}
-                                                            className="w-20 h-20 object-cover border rounded"
-                                                        />
+                                                    {galleryPreviews.map((url, i) => (
+                                                        <div key={i} className="relative w-fit">
+                                                            <img
+                                                                src={url}
+                                                                alt={`Gallery Image ${i + 1}`}
+                                                                className="w-20 h-20 object-cover border rounded"
+                                                            />
+                                                            <DeleteAlert
+                                                                icon={<X className='w-3 h-3' />}
+                                                                triggerClassName="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                                                                isLoading={false}
+                                                                title="Remove gallery image?"
+                                                                description="Are you sure you want to remove this image from the gallery?"
+                                                                confirmText="Yes, remove"
+                                                                onConfirm={() => handleGalleryImageRemove(i)}
+                                                            />
+                                                        </div>
                                                     ))}
                                                 </div>
                                             )}
+                                            <p className="text-sm text-muted-foreground mt-1">
+                                                {galleryPreviews.length} / 8 images uploaded
+                                            </p>
                                             <FormMessage />
                                         </FormItem>
                                     )}

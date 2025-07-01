@@ -1,97 +1,162 @@
-import { Link, router } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Input } from '@/components/ui/input';
-import AppLayout from '@/layouts/app-layout';
+"use client"
 
-interface Category {
-    id: number;
-    name: string;
-    slug: string;
-    description: string | null;
-    parent_id: number | null;
-    position: number | null;
-    is_active: boolean;
-    parent?: Category | null;
-}
+import { useState } from "react"
+import { Head, router } from "@inertiajs/react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Plus, Search, Grid, List, TreePine } from "lucide-react"
+import { Category } from "@/validations/category-schema"
+import { CategoryCard } from "./Partials/category-card"
+import AppLayout from "@/layouts/app-layout"
 
 interface Props {
-    categories: Category[];
+    categories: Category[]
 }
 
-
-
 export default function Index({ categories }: Props) {
-    const handleDelete = (slug: string) => {
-        if (confirm('Are you sure you want to delete this category?')) {
-            router.delete(route('categories.destroy', slug));
+    const [searchTerm, setSearchTerm] = useState("")
+    const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+    const [deleteCategory, setDeleteCategory] = useState<Category | null>(null)
+
+    const filteredCategories = categories.filter(
+        (category) =>
+            category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            category.description?.toLowerCase().includes(searchTerm.toLowerCase()),
+    )
+
+    const handleDelete = (category: Category) => {
+        setDeleteCategory(category)
+    }
+
+    const confirmDelete = () => {
+        if (deleteCategory) {
+            router.delete(route("categories.destroy", deleteCategory.slug), {
+                onSuccess: () => {
+                    setDeleteCategory(null)
+                },
+            })
         }
-    };
+    }
 
     return (
-        <AppLayout>
-            <div className="p-4 space-y-4">
-                {/* Header with search and create */}
-                <div className="flex justify-between items-center gap-4">
-                    <Input
-                        type="text"
-                        placeholder="Search categories..."
-                        className="max-w-sm"
-                    />
-                    <Link href={route('categories.create')}>
-                        <Button>Add Category</Button>
-                    </Link>
-                </div>
 
-                {/* Table */}
-                <Card className="overflow-auto max-h-[calc(100vh-200px)] border rounded-xl">
-                    <Table>
-                        <TableHeader>
-                            <TableRow className="bg-muted">
-                                <TableHead className="px-2">#</TableHead>
-                                <TableHead className="px-2">Name</TableHead>
-                                <TableHead className="px-2">Parent</TableHead>
-                                <TableHead className="px-2">Position</TableHead>
-                                <TableHead className="px-2">Status</TableHead>
-                                <TableHead className="text-right px-2 w-32">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody className="divide-y divide-gray-200">
-                            {categories.map((category, index) => (
-                                <TableRow
-                                    key={category.id}
-                                    className="hover:bg-muted/40"
-                                >
-                                    <TableCell className="px-2 font-medium">{index + 1}</TableCell>
-                                    <TableCell className="px-2">{category.name}</TableCell>
-                                    <TableCell className="px-2">{category.parent?.name ?? '—'}</TableCell>
-                                    <TableCell className="px-2">{category.position ?? '—'}</TableCell>
-                                    <TableCell className="px-2">
-                                        {category.is_active ? (
-                                            <span className="text-green-600">Active</span>
-                                        ) : (
-                                            <span className="text-red-600">Inactive</span>
-                                        )}
-                                    </TableCell>
-                                    <TableCell className="text-right px-2 w-32 space-x-2">
-                                        <Link href={route('categories.edit', category.slug)}>
-                                            <Button size="sm" variant="outline">Edit</Button>
-                                        </Link>
-                                        <Button
-                                            size="sm"
-                                            variant="destructive"
-                                            onClick={() => handleDelete(category.slug)}
-                                        >
-                                            Delete
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
+        <AppLayout>
+            <Head title="Categories" />
+
+            <div className="container mx-auto py-8 px-4">
+                <div className="flex flex-col space-y-6">
+                    {/* Header */}
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+                        <div>
+                            <h1 className="text-3xl font-bold">Categories</h1>
+                            <p className="text-muted-foreground">Manage your product categories</p>
+                        </div>
+                        <div className="flex space-x-2">
+                            <Button variant="outline" onClick={() => router.get(route("categories.tree"))}>
+                                <TreePine className="h-4 w-4 mr-2" />
+                                Tree View
+                            </Button>
+                            <Button onClick={() => router.get(route("categories.create"))}>
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add Category
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* Search and Filters */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Search & Filter</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                                <div className="flex-1">
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                        <Input
+                                            placeholder="Search categories..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            className="pl-10"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex space-x-2">
+                                    <Button
+                                        variant={viewMode === "grid" ? "default" : "outline"}
+                                        size="sm"
+                                        onClick={() => setViewMode("grid")}
+                                    >
+                                        <Grid className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant={viewMode === "list" ? "default" : "outline"}
+                                        size="sm"
+                                        onClick={() => setViewMode("list")}
+                                    >
+                                        <List className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Categories Grid/List */}
+                    {filteredCategories.length > 0 ? (
+                        <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
+                            {filteredCategories.map((category) => (
+                                <CategoryCard key={category.id} category={category} onDelete={handleDelete} />
                             ))}
-                        </TableBody>
-                    </Table>
-                </Card>
+                        </div>
+                    ) : (
+                        <Card>
+                            <CardContent className="flex flex-col items-center justify-center py-12">
+                                <div className="text-center">
+                                    <h3 className="text-lg font-semibold mb-2">No categories found</h3>
+                                    <p className="text-muted-foreground mb-4">
+                                        {searchTerm ? "Try adjusting your search terms" : "Get started by creating your first category"}
+                                    </p>
+                                    <Button onClick={() => router.get(route("categories.create"))}>
+                                        <Plus className="h-4 w-4 mr-2" />
+                                        Add Category
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+                </div>
             </div>
-        </AppLayout>
-    );
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={!!deleteCategory} onOpenChange={() => setDeleteCategory(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the category "{deleteCategory?.name}" and
+                            remove it from our servers.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+        </AppLayout >
+    )
 }

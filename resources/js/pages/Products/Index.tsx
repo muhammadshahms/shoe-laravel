@@ -18,6 +18,8 @@ import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import Pagination from '@/components/pagination';
 import { Product } from '@/types/product';
+import DeleteAlert from '@/components/Global/DeleteAlert';
+import { Trash2 } from 'lucide-react';
 
 interface ProductIndexProps {
     products: {
@@ -50,8 +52,6 @@ export default function Index({ products }: ProductIndexProps) {
         products.data.length > 0 && selected.length === products.data.length;
 
     const handleDelete = (slug: string) => {
-        if (!confirm('Are you sure you want to delete this product?')) return;
-
         router.delete(`/dashboard/products/${slug}`, {
             onSuccess: () => toast.success('Product deleted successfully'),
             onError: () => toast.error('Failed to delete product'),
@@ -145,6 +145,7 @@ export default function Index({ products }: ProductIndexProps) {
                                     <TableCell className="px-2">
                                         {product.brand?.name || '—'}
                                     </TableCell>
+
                                     <TableCell className="px-2">
                                         {product.categories_list ||
                                             product.categories?.map(c => c.name).join(', ') ||
@@ -164,13 +165,13 @@ export default function Index({ products }: ProductIndexProps) {
                                                 Edit
                                             </Button>
                                         </Link>
-                                        <Button
-                                            size="sm"
-                                            variant="destructive"
-                                            onClick={() => handleDelete(product.slug!)}
-                                        >
-                                            Delete
-                                        </Button>
+                                        <DeleteAlert
+                                            onConfirm={() => handleDelete(product.slug!)}
+                                            trigger={<Button variant="destructive">Delete</Button>}
+                                            title="Delete Product"
+                                            description={`Are you sure you want to delete "${product.name}"?`}
+                                            confirmText="Delete"
+                                        />
                                     </TableCell>
                                 </TableRow>
                             ))}

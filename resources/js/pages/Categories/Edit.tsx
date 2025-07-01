@@ -1,102 +1,64 @@
-import { useForm } from '@inertiajs/react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Card } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import AppLayout from '@/layouts/app-layout';
+"use client"
 
-interface Category {
-    id: number;
-    name: string;
-}
+import { useState } from "react"
+import { Head, router } from "@inertiajs/react"
+import { ArrowLeft } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import type { Category } from "@/validations/category-schema"
+import { CategoryForm } from "./Partials/category-form"
+import AppLayout from "@/layouts/app-layout"
 
 interface Props {
-    category: {
-        id: number;
-        name: string;
-        description: string;
-        parent_id: string | null;
-        position: number | null;
-        is_active: boolean;
-        slug: string;
-    };
-    parents: Category[];
+    category: Category
+    parents: Category[]
 }
 
 export default function Edit({ category, parents }: Props) {
-    const { data, setData, put, processing, errors } = useForm({
-        name: category.name,
-        description: category.description,
-        parent_id: category.parent_id !== null ? String(category.parent_id) : 'null',
-        position: category.position ?? '',
-        is_active: category.is_active,
-    });
+    const [isLoading, setIsLoading] = useState(false)
 
+    const handleSubmit = (formData: FormData) => {
+        setIsLoading(true)
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        put(route('categories.update', category.slug));
-    };
+        router.post(route("categories.update", category.slug), formData, {
+            forceFormData: true,
+            preserveState: false,
+            onSuccess: () => {
+                console.log("Category updated successfully")
+                setIsLoading(false)
+            },
+            onError: (errors) => {
+                console.error("Validation errors:", errors)
+                setIsLoading(false)
+            },
+            onFinish: () => {
+                setIsLoading(false)
+            },
+        })
+    }
 
     return (
+        <>
+            <AppLayout>
+                <Head title={`Edit ${category.name}`} />
+                <div className="container mx-auto py-8 px-4">
+                    <div className="flex flex-col space-y-6">
+                        {/* Header */}
+                        <div className="flex items-center space-x-4">
+                            <Button variant="ghost" size="sm" onClick={() => router.get(route("categories.index"))}>
+                                <ArrowLeft className="h-4 w-4 mr-2" />
+                                Back to Categories
+                            </Button>
+                        </div>
+                        <div>
+                            <h1 className="text-3xl font-bold">Edit Category</h1>
+                            <p className="text-muted-foreground">Update "{category.name}" category details</p>
+                        </div>
 
-        <AppLayout>
-            <form onSubmit={handleSubmit} className="space-y-4 p-4">
-                <div className='space-y-2'>
-                    <Label>Name</Label>
-                    <Input value={data.name} onChange={(e) => setData('name', e.target.value)} />
-                    {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
+                        {/* Form */}
+                        <CategoryForm category={category} parents={parents} onSubmit={handleSubmit} isLoading={isLoading} />
+                    </div>
                 </div>
-
-                <div className='space-y-2'>
-                    <Label>Description</Label>
-                    <Textarea value={data.description} onChange={(e) => setData('description', e.target.value)} />
-                </div>
-
-                <div className='space-y-2'>
-                    <Label>Parent Category</Label>
-                    <Select
-                        value={data.parent_id}
-                        onValueChange={(value) => setData('parent_id', value === 'null' ? null : value)}
-                    >
-                        <SelectTrigger>
-                            <SelectValue
-                                placeholder="Select parent category"
-                                defaultValue={
-                                    parents.find((p) => String(p.id) === data.parent_id)?.name ?? 'None'
-                                }
-                            />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="null">None</SelectItem>
-                            {parents.map((cat) => (
-                                <SelectItem key={cat.id} value={String(cat.id)}>
-                                    {cat.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-
-
-                </div>
-
-                <div className='space-y-2'>
-                    <Label>Position</Label>
-                    <Input type="number" value={data.position} onChange={(e) => setData('position', e.target.value)} />
-                </div>
-
-                <div className="flex items-center space-x-2">
-                    <Switch checked={data.is_active} onCheckedChange={(checked) => setData('is_active', checked)} />
-                    <Label>Active</Label>
-                </div>
-
-                <Button type="submit" disabled={processing}>
-                    Update
-                </Button>
-            </form>
-        </AppLayout>
-    );
+            </AppLayout>
+        </>
+    )
 }

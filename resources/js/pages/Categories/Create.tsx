@@ -1,84 +1,56 @@
-import { useForm } from '@inertiajs/react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Card } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import AppLayout from '@/layouts/app-layout';
+"use client"
 
-interface Category {
-    id: number;
-    name: string;
-}
+import { Head, router } from "@inertiajs/react"
+import { ArrowLeft } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { CategoryForm } from "./Partials/category-form"
+import { Category, CategoryFormData } from "@/validations/category-schema"
+import AppLayout from "@/layouts/app-layout"
 
 interface Props {
-    parents: Category[];
+    parents: Category[]
 }
 
 export default function Create({ parents }: Props) {
-    const { data, setData, post, processing, errors } = useForm({
-        name: '',
-        description: '',
-        parent_id: '',
-        position: '',
-        is_active: true,
-    });
+    const handleSubmit = (data: CategoryFormData) => {
+        const formData = new FormData()
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        post(route('categories.store'));
-    };
+        Object.entries(data).forEach(([key, value]) => {
+            if (key === "image" && value instanceof File) {
+                formData.append(key, value)
+            } else if (value !== undefined && value !== null && value !== "") {
+                formData.append(key, value.toString())
+            }
+        })
+
+        router.post(route("categories.store"), formData, {
+            forceFormData: true,
+        })
+    }
 
     return (
         <AppLayout>
+            <Head title="Create Category" />
 
-            <h2 className="text-2xl font-bold">Create Category</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                    <Label>Name</Label>
-                    <Input value={data.name} onChange={(e) => setData('name', e.target.value)} />
-                    {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
+            <div className="container mx-auto py-8 px-4">
+                <div className="flex flex-col space-y-6">
+                    {/* Header */}
+                    <div className="flex items-center space-x-4">
+                        <Button variant="ghost" size="sm" onClick={() => router.get(route("categories.index"))}>
+                            <ArrowLeft className="h-4 w-4 mr-2" />
+                            Back to Categories
+                        </Button>
+                    </div>
+
+                    <div>
+                        <h1 className="text-3xl font-bold">Create Category</h1>
+                        <p className="text-muted-foreground">Add a new category to organize your products</p>
+                    </div>
+
+                    {/* Form */}
+                    <CategoryForm parents={parents} onSubmit={handleSubmit} />
                 </div>
-
-                <div>
-                    <Label>Description</Label>
-                    <Textarea value={data.description} onChange={(e) => setData('description', e.target.value)} />
-                </div>
-
-                <div>
-                    <Label>Parent Category</Label>
-                    <Select value={data.parent_id} onValueChange={(value) => setData('parent_id', value)}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select parent category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="null">None</SelectItem>
-                            {parents.map((cat) => (
-                                <SelectItem key={cat.id} value={String(cat.id)}>
-                                    {cat.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                <div>
-                    <Label>Position</Label>
-                    <Input type="number" value={data.position} onChange={(e) => setData('position', e.target.value)} />
-                </div>
-
-                <div className="flex items-center space-x-2">
-                    <Switch checked={data.is_active} onCheckedChange={(checked) => setData('is_active', checked)} />
-                    <Label>Active</Label>
-                </div>
-
-                <Button type="submit" disabled={processing}>
-                    Save
-                </Button>
-            </form>
-
+            </div>
         </AppLayout>
-    );
+    )
 }

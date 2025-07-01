@@ -78,6 +78,11 @@ class ProductController extends Controller
 
             'main_image' => 'nullable|image|max:2048',
             'gallery.*' => 'nullable|image|max:2048',
+            'gallery' => ['nullable', 'array', 'max:8'],
+            
+            'removedMainImage' => 'nullable|boolean',
+            'removedGalleryIndexes' => 'nullable|array',
+            'removedGalleryIndexes.*' => 'integer',
         ]);
 
 
@@ -145,11 +150,31 @@ class ProductController extends Controller
 
             'main_image' => 'nullable|image|max:2048',
             'gallery.*' => 'nullable|image|max:2048',
+            'gallery' => ['nullable', 'array', 'max:8'],
+
+            'removedMainImage' => 'nullable|boolean',
+            'removedGalleryIndexes' => 'nullable|array',
+            'removedGalleryIndexes.*' => 'integer',
         ]);
 
 
         $product->update($data);
 
+        // 🔥 Remove old images based on frontend flags
+        if ($request->boolean('removedMainImage')) {
+            $product->clearMediaCollection('main_image');
+        }
+
+        if ($request->filled('removedGalleryIndexes')) {
+            $galleryMedia = $product->getMedia('gallery');
+            foreach ($request->removedGalleryIndexes as $index) {
+                if (isset($galleryMedia[$index])) {
+                    $galleryMedia[$index]->delete();
+                }
+            }
+        }
+
+        // 🔄 Upload new images
         if ($request->hasFile('main_image')) {
             $product->clearMediaCollection('main_image');
             $product->addMediaFromRequest('main_image')->toMediaCollection('main_image');
@@ -162,6 +187,7 @@ class ProductController extends Controller
             }
         }
 
+        // Sync categories
         $product->categories()->sync($data['category_ids'] ?? []);
 
         return redirect()->route('products.index')->with('success', 'Product updated successfully.');
