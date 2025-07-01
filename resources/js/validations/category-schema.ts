@@ -5,7 +5,7 @@ export const categorySchema = z.object({
   description: z.string().optional(),
   parent_id: z.string().optional(), // Remove nullable, use empty string instead
   position: z.coerce.number().optional(),
-  is_active: z.boolean().default(true),
+  is_active: z.boolean().optional(),
   image: z.any().optional(),
   remove_image: z.boolean().optional().default(false),
 })

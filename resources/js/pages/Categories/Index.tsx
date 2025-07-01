@@ -19,17 +19,21 @@ import { Plus, Search, Grid, List, TreePine } from "lucide-react"
 import { Category } from "@/validations/category-schema"
 import { CategoryCard } from "./Partials/category-card"
 import AppLayout from "@/layouts/app-layout"
+import Pagination from "@/components/pagination"
 
 interface Props {
-    categories: Category[]
+    categories: {
+        data: Category[]
+        meta: any
+        links: any
+    }
 }
-
 export default function Index({ categories }: Props) {
     const [searchTerm, setSearchTerm] = useState("")
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
     const [deleteCategory, setDeleteCategory] = useState<Category | null>(null)
 
-    const filteredCategories = categories.filter(
+    const filteredCategories = categories.data.filter(
         (category) =>
             category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             category.description?.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -75,52 +79,49 @@ export default function Index({ categories }: Props) {
                     </div>
 
                     {/* Search and Filters */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Search & Filter</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                                <div className="flex-1">
-                                    <div className="relative">
-                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                                        <Input
-                                            placeholder="Search categories..."
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                            className="pl-10"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="flex space-x-2">
-                                    <Button
-                                        variant={viewMode === "grid" ? "default" : "outline"}
-                                        size="sm"
-                                        onClick={() => setViewMode("grid")}
-                                    >
-                                        <Grid className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                        variant={viewMode === "list" ? "default" : "outline"}
-                                        size="sm"
-                                        onClick={() => setViewMode("list")}
-                                    >
-                                        <List className="h-4 w-4" />
-                                    </Button>
-                                </div>
+
+
+                    <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-4 sm:space-x-4">
+                        <div className="flex-1">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                <Input
+                                    placeholder="Search categories..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="pl-10"
+                                />
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                        <div className="flex space-x-2">
+                            <Button
+                                variant={viewMode === "grid" ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => setViewMode("grid")}
+                            >
+                                <Grid className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                variant={viewMode === "list" ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => setViewMode("list")}
+                            >
+                                <List className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </div>
+
 
                     {/* Categories Grid/List */}
                     {filteredCategories.length > 0 ? (
-                        <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
+                        <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10" : "space-y-6"}>
                             {filteredCategories.map((category) => (
                                 <CategoryCard key={category.id} category={category} onDelete={handleDelete} />
                             ))}
                         </div>
+
                     ) : (
-                        <Card>
+                        <Card >
                             <CardContent className="flex flex-col items-center justify-center py-12">
                                 <div className="text-center">
                                     <h3 className="text-lg font-semibold mb-2">No categories found</h3>
@@ -136,6 +137,7 @@ export default function Index({ categories }: Props) {
                         </Card>
                     )}
                 </div>
+                <Pagination meta={categories.meta} links={categories.links} />
             </div>
 
             {/* Delete Confirmation Dialog */}

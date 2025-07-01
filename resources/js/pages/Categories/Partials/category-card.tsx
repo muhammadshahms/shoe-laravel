@@ -15,18 +15,18 @@ interface CategoryCardProps {
 
 export function CategoryCard({ category, onDelete }: CategoryCardProps) {
     return (
-        <Card className="hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
+        <Card className="hover:shadow-md transition-shadow flex flex-col h-full p-4 sm:p-6">
+            <CardHeader className="p-0 mb-4">
                 <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-4">
                         {category.image_url ? (
                             <img
                                 src={category.image_url || "/placeholder.svg"}
                                 alt={category.name}
-                                className="w-12 h-12 object-cover rounded-lg border"
+                                className="w-14 h-14 object-cover rounded-lg border"
                             />
                         ) : (
-                            <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                            <div className="w-14 h-14 bg-gray-100 rounded-lg flex items-center justify-center">
                                 <ImageIcon className="h-6 w-6 text-gray-400" />
                             </div>
                         )}
@@ -35,10 +35,7 @@ export function CategoryCard({ category, onDelete }: CategoryCardProps) {
                             {category.parent && <p className="text-sm text-muted-foreground">Parent: {category.parent.name}</p>}
                         </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                        <Badge variant={category.is_active ? "default" : "secondary"}>
-                            {category.is_active ? "Active" : "Inactive"}
-                        </Badge>
+                    <div className="flex flex-col items-end space-y-2">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="h-8 w-8 p-0">
@@ -60,12 +57,20 @@ export function CategoryCard({ category, onDelete }: CategoryCardProps) {
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
+                        <Badge variant={category.is_active ? "default" : "secondary"}>
+                            {category.is_active ? "Active" : "Inactive"}
+                        </Badge>
                     </div>
                 </div>
             </CardHeader>
-            <CardContent>
-                {category.description && <p className="text-sm text-muted-foreground mb-3">{category.description}</p>}
-                <div className="flex justify-between text-xs text-muted-foreground">
+
+            <CardContent className="flex flex-col flex-1 p-0">
+                {category.description && (
+                    <p className="text-sm text-muted-foreground mb-4">
+                        {category.description}
+                    </p>
+                )}
+                <div className="mt-auto pt-2 border-t flex justify-between text-xs text-muted-foreground">
                     <span>Position: {category.position || 0}</span>
                     <span>Created: {new Date(category.created_at).toLocaleDateString()}</span>
                 </div>

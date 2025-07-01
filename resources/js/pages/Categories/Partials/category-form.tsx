@@ -103,17 +103,14 @@ export function CategoryForm({ category, parents, onSubmit, isLoading }: Categor
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle>{category ? "Edit Category" : "Create Category"}</CardTitle>
-      </CardHeader>
+    <Card className="w-full max-w-2xl mx-auto p-4 sm:p-6">
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
             {/* Image Upload Section */}
             <div className="space-y-4">
               <FormLabel>Category Image</FormLabel>
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-6">
                 {imagePreview && !removeImage ? (
                   <div className="relative">
                     <img
@@ -156,6 +153,7 @@ export function CategoryForm({ category, parents, onSubmit, isLoading }: Categor
               </div>
             </div>
 
+            {/* Name Field */}
             <FormField
               control={form.control}
               name="name"
@@ -170,6 +168,7 @@ export function CategoryForm({ category, parents, onSubmit, isLoading }: Categor
               )}
             />
 
+            {/* Description Field */}
             <FormField
               control={form.control}
               name="description"
@@ -184,6 +183,7 @@ export function CategoryForm({ category, parents, onSubmit, isLoading }: Categor
               )}
             />
 
+            {/* Parent Category Select */}
             <FormField
               control={form.control}
               name="parent_id"
@@ -193,7 +193,7 @@ export function CategoryForm({ category, parents, onSubmit, isLoading }: Categor
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select parent category (optional)" />
+                        <SelectValue placeholder="Select parent category (optional)" className="text-muted-foreground" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -210,6 +210,7 @@ export function CategoryForm({ category, parents, onSubmit, isLoading }: Categor
               )}
             />
 
+            {/* Position Field */}
             <FormField
               control={form.control}
               name="position"
@@ -224,11 +225,12 @@ export function CategoryForm({ category, parents, onSubmit, isLoading }: Categor
               )}
             />
 
+            {/* Active Status Switch */}
             <FormField
               control={form.control}
               name="is_active"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                <FormItem className="flex flex-row items-center justify-between rounded-md border p-4 bg-muted">
                   <div className="space-y-0.5">
                     <FormLabel className="text-base">Active Status</FormLabel>
                     <div className="text-sm text-muted-foreground">Enable or disable this category</div>
@@ -240,7 +242,8 @@ export function CategoryForm({ category, parents, onSubmit, isLoading }: Categor
               )}
             />
 
-            <div className="flex justify-end space-x-4">
+            {/* Submit Buttons */}
+            <div className="flex justify-end space-x-4 pt-6 border-t">
               <Button type="button" variant="outline" onClick={() => window.history.back()}>
                 Cancel
               </Button>
@@ -252,5 +255,6 @@ export function CategoryForm({ category, parents, onSubmit, isLoading }: Categor
         </Form>
       </CardContent>
     </Card>
+
   )
 }

@@ -15,8 +15,8 @@ class CategoryController extends Controller
     {
         $categories = Category::with(['parent', 'media'])
             ->orderBy('position')
-            ->get()
-            ->map(function ($category) {
+            ->paginate(10) // Adjust per page as needed
+            ->through(function ($category) {
                 return [
                     'id' => $category->id,
                     'name' => $category->name,
@@ -36,6 +36,7 @@ class CategoryController extends Controller
             'categories' => $categories,
         ]);
     }
+
 
     /**
      * Show the form for creating a new category.
