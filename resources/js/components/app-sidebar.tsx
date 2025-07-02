@@ -20,15 +20,15 @@ const mainNavItems: NavItem[] = [
         children: [
             {
                 title: 'Variants',
-                href: '/dashboard/products/variants/',
+                href: '/dashboard/product-variations',
             },
             {
                 title: 'Categories',
-                href: '/dashboard/products/categories',
+                href: '/dashboard/categories',
             },
             {
                 title: 'Attributes',
-                href: '/dashboard/products/attributes',
+                href: '/dashboard/attributes',
             },
         ],
     },

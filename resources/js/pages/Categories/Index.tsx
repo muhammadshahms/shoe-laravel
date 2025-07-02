@@ -22,6 +22,7 @@ import AppLayout from "@/layouts/app-layout"
 import Pagination from "@/components/pagination"
 import { Breadcrumbs } from "@/components/breadcrumbs"
 import { BreadcrumbItem } from "@/types"
+import { Badge } from "@/components/ui/badge"
 
 interface Props {
     categories: {
@@ -37,9 +38,9 @@ export default function Index({ categories }: Props) {
     const breadcrumbs = (rawBreadcrumbs ?? []) as BreadcrumbItem[];
 
     console.log(breadcrumbs);
-    
+
     const [searchTerm, setSearchTerm] = useState("")
-    const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+    const [viewMode, setViewMode] = useState<"grid" | "table">("grid")
     const [deleteCategory, setDeleteCategory] = useState<Category | null>(null)
 
     const filteredCategories = categories.data.filter(
@@ -111,9 +112,9 @@ export default function Index({ categories }: Props) {
                                 <Grid className="h-4 w-4" />
                             </Button>
                             <Button
-                                variant={viewMode === "list" ? "default" : "outline"}
+                                variant={viewMode === "table" ? "default" : "outline"}
                                 size="sm"
-                                onClick={() => setViewMode("list")}
+                                onClick={() => setViewMode("table")}
                             >
                                 <List className="h-4 w-4" />
                             </Button>
@@ -123,13 +124,63 @@ export default function Index({ categories }: Props) {
 
                     {/* Categories Grid/List */}
                     {filteredCategories.length > 0 ? (
-                        <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10" : "space-y-6"}>
-                            {filteredCategories.map((category) => (
-                                <CategoryCard key={category.id} category={category} onDelete={handleDelete} />
-                            ))}
-                        </div>
-
+                        viewMode === "grid" ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                                {filteredCategories.map((category) => (
+                                    <CategoryCard key={category.id} category={category} onDelete={handleDelete} />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="rounded-md border">
+                                <table className="w-full table-auto text-sm">
+                                    <thead className="bg-muted">
+                                        <tr>
+                                            <th className="text-left p-3 font-semibold">Name</th>
+                                            <th className="text-left p-3 font-semibold">Description</th>
+                                            <th className="text-left p-3 font-semibold">Status</th>
+                                            <th className="text-left p-3 font-semibold">Slug</th>
+                                            <th className="text-left p-3 font-semibold">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {filteredCategories.map((category) => (
+                                            <tr key={category.id} className="border-t">
+                                                <td className="p-3 font-medium">{category.name}</td>
+                                                <td className="p-3">{category.description || "-"}</td>
+                                                {/* create a ui for this
+                                                <td className="p-3">{category.is_active}</td> */}
+                                                <td className="p-3">
+                                                    <Badge variant={category.is_active ? "default" : "secondary"}>
+                                                        {category.is_active ? "Active" : "Inactive"}
+                                                    </Badge>
+                                                </td>
+                                                <td className="p-3 text-muted-foreground">{category.slug}</td>
+                                                <td className="p-3 flex gap-2">
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => router.get(route("categories.edit", category.slug))}
+                                                    >
+                                                        Edit
+                                                    </Button>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="text-red-600"
+                                                        onClick={() => handleDelete(category)}
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )
                     ) : (
+                        // ... keep your no results fallback as-is
+
                         <Card >
                             <CardContent className="flex flex-col items-center justify-center py-12">
                                 <div className="text-center">

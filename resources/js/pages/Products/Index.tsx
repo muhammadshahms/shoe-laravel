@@ -113,7 +113,6 @@ export default function Index({ products }: ProductIndexProps) {
                                         aria-label="Select all"
                                     />
                                 </TableHead>
-                                <TableHead className="w-10 px-2">#</TableHead>
                                 <TableHead className="px-2">Name</TableHead>
                                 <TableHead className="px-2">Price</TableHead>
                                 <TableHead className="px-2">Brand</TableHead>
@@ -137,9 +136,7 @@ export default function Index({ products }: ProductIndexProps) {
                                             aria-label={`Select product ${product.name}`}
                                         />
                                     </TableCell>
-                                    <TableCell className="w-10 px-2 font-medium">
-                                        {index + 1}
-                                    </TableCell>
+                                   
                                     <TableCell className="px-2">{product.name}</TableCell>
                                     <TableCell className="px-2">{product.price}</TableCell>
                                     <TableCell className="px-2">

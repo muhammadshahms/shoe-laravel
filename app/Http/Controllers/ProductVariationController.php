@@ -18,7 +18,7 @@ class ProductVariationController extends Controller
 
     public function create()
     {
-        $products = Product::all(); 
+        $products = Product::all();
         return inertia('ProductVariation/Create', [
             'products' => $products
         ]);
@@ -66,7 +66,15 @@ class ProductVariationController extends Controller
 
         return redirect()->route('product-variations.index')->with('success', 'Variation updated successfully.');
     }
+    public function show(ProductVariation $productVariation)
+    {
+        $productVariation->load('product');
 
+        return inertia('ProductVariation/Show', [
+            'variation' => $productVariation
+        ]);
+    }
+    
     public function destroy(ProductVariation $productVariation)
     {
         $productVariation->delete();

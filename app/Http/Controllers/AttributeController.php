@@ -27,6 +27,7 @@ class AttributeController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            
         ]);
 
         $validated['code'] = Str::slug($validated['name']);

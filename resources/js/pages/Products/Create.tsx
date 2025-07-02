@@ -8,7 +8,7 @@ import { router } from '@inertiajs/react';
 export default function Create({ product, brands, categories, main_image_url, gallery_urls }) {
     return (
         <AppLayout>
-            <div className="p-6">
+            <div className="container mx-auto py-8 px-4">
 
                 <h2 className="text-2xl font-bold mb-4">Create Product</h2>
                 <ProductForm
