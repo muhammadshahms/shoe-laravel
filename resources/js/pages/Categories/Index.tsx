@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Head, router } from "@inertiajs/react"
+import { Head, router, usePage } from "@inertiajs/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -20,6 +20,8 @@ import { Category } from "@/validations/category-schema"
 import { CategoryCard } from "./Partials/category-card"
 import AppLayout from "@/layouts/app-layout"
 import Pagination from "@/components/pagination"
+import { Breadcrumbs } from "@/components/breadcrumbs"
+import { BreadcrumbItem } from "@/types"
 
 interface Props {
     categories: {
@@ -29,6 +31,13 @@ interface Props {
     }
 }
 export default function Index({ categories }: Props) {
+
+    const { breadcrumbs: rawBreadcrumbs } = usePage().props;
+
+    const breadcrumbs = (rawBreadcrumbs ?? []) as BreadcrumbItem[];
+
+    console.log(breadcrumbs);
+    
     const [searchTerm, setSearchTerm] = useState("")
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
     const [deleteCategory, setDeleteCategory] = useState<Category | null>(null)
@@ -55,7 +64,7 @@ export default function Index({ categories }: Props) {
 
     return (
 
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Categories" />
 
             <div className="container mx-auto py-8 px-4">

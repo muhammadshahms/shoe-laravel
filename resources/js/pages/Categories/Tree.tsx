@@ -126,7 +126,7 @@ function TreeNode({ category, children, level, expandedNodes, onToggle, allCateg
         </div>
       )}
     </div>
-   
+
   )
 }
 
@@ -191,40 +191,32 @@ export default function CategoriesTree({ categories }: Props) {
             </div>
 
             {/* Search and Controls */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Search & Controls</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                  <div className="flex-1">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                      <Input
-                        placeholder="Search categories..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button variant="outline" size="sm" onClick={expandAll}>
-                      Expand All
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={collapseAll}>
-                      Collapse All
-                    </Button>
-                  </div>
+            <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Search categories..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+              <div className="flex space-x-2">
+                <Button variant="outline" size="sm" onClick={expandAll}>
+                  Expand All
+                </Button>
+                <Button variant="outline" size="sm" onClick={collapseAll}>
+                  Collapse All
+                </Button>
+              </div>
+            </div>
+
 
             {/* Tree View */}
             <Card>
-              <CardHeader>
-                <CardTitle>Category Hierarchy</CardTitle>
-              </CardHeader>
+
               <CardContent>
                 {searchTerm ? (
                   // Flat search results
