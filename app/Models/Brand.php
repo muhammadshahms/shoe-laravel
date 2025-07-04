@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Brand extends Model implements HasMedia
 {
     use InteractsWithMedia, HasSlug;
-    use HasFactory; 
+    use HasFactory;
     protected $fillable = [
         'name',
         'slug',

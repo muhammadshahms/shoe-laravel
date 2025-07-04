@@ -30,6 +30,11 @@ const mainNavItems: NavItem[] = [
                 title: 'Attributes',
                 href: '/dashboard/attributes',
             },
+        
+            {
+                title: 'Brands',
+                href: '/dashboard/brands',
+            },
         ],
     },
 ];
