@@ -1,185 +1,308 @@
-// File: pages/dashboard/products/index.tsx
+"use client";
 
-import React, { useState } from 'react';
-import { Link, router } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import AppLayout from '@/layouts/app-layout';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 import {
-    Table,
-    TableBody,
-    TableHead,
-    TableHeader,
-    TableRow,
-    TableCell,
-} from '@/components/ui/table';
-import { Checkbox } from '@/components/ui/checkbox';
-import { toast } from 'sonner';
-import { Input } from '@/components/ui/input';
-import Pagination from '@/components/pagination';
-import { Product } from '@/types/product';
-import DeleteAlert from '@/components/Global/DeleteAlert';
-import { Trash2 } from 'lucide-react';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Plus, Search, Grid, List, Package } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ProductCard } from "./Partials/ProductCard";
+import AppLayout from "@/layouts/app-layout";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { router } from "@inertiajs/react";
+import Pagination from "@/components/pagination"; // adjust import as per your structure
 
-interface ProductIndexProps {
-    products: {
-        data: Product[];
-        meta: any;
-        links: any;
-    };
+interface Product {
+  id: string;
+  slug: string;
+  name: string;
+  price: number;
+  brand?: { name: string };
+  categories?: { name: string }[];
+  categories_list?: string;
+  quantity: number;
+  is_active: boolean;
+  image?: string;
+  description?: string;
 }
 
-export default function Index({ products }: ProductIndexProps) {
-    const [selected, setSelected] = useState<string[]>([]);
+interface Props {
+  products: {
+    data: Product[];
+    meta: any;
+    links: any;
+  };
+}
 
-    const toggleSelectAll = () => {
-        if (selected.length === products.data.length) {
-            setSelected([]);
-        } else {
-            setSelected(products.data.map(p => p.slug!));
-        }
-    };
+export default function ProductsPage({ products }: Props) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
+  const [deleteProduct, setDeleteProduct] = useState<Product | null>(null);
+  const [selected, setSelected] = useState<string[]>([]);
 
-    const toggleSelectOne = (slug: string) => {
-        setSelected(prev =>
-            prev.includes(slug)
-                ? prev.filter(s => s !== slug)
-                : [...prev, slug]
-        );
-    };
+  const formatPrice = (price: number | string | undefined): string => {
+    if (typeof price === "number") {
+      return price.toFixed(2);
+    }
+    if (typeof price === "string") {
+      const numPrice = Number.parseFloat(price);
+      return isNaN(numPrice) ? "0.00" : numPrice.toFixed(2);
+    }
+    return "0.00";
+  };
 
-    const isAllSelected =
-        products.data.length > 0 && selected.length === products.data.length;
+  const filteredProducts = products.data.filter(
+    (product) =>
+      product.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.brand?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.description?.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
-    const handleDelete = (slug: string) => {
-        router.delete(`/dashboard/products/${slug}`, {
-            onSuccess: () => toast.success('Product deleted successfully'),
-            onError: () => toast.error('Failed to delete product'),
-        });
-    };
+  const toggleSelectAll = () => {
+    if (selected.length === filteredProducts.length) {
+      setSelected([]);
+    } else {
+      setSelected(filteredProducts.map((p) => p.slug));
+    }
+  };
 
-    const handleBulkDelete = () => {
-        if (selected.length === 0) {
-            toast.warning('No products selected.');
-            return;
-        }
-
-        if (!confirm(`Delete ${selected.length} product(s)?`)) return;
-
-        router.post('/dashboard/products/bulk-delete', { slugs: selected }, {
-            onSuccess: () => {
-                toast.success('Selected products deleted');
-                setSelected([]);
-            },
-            onError: () => toast.error('Bulk delete failed'),
-        });
-    };
-
-    return (
-        <AppLayout>
-            <div className="p-4 space-y-4">
-                <div className="flex justify-between items-center gap-4">
-                    <Input
-                        type="text"
-                        placeholder="Search products..."
-                        className="max-w-sm"
-                    />
-
-                    <div className="flex items-center gap-2">
-                        {selected.length > 0 && (
-                            <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={handleBulkDelete}
-                            >
-                                Delete Selected
-                            </Button>
-                        )}
-
-                        <Link href="/dashboard/products/create">
-                            <Button>Add Product</Button>
-                        </Link>
-                    </div>
-                </div>
-
-                <Card className="overflow-auto max-h-[calc(100vh-200px)] border rounded-xl">
-                    <Table>
-                        <TableHeader>
-                            <TableRow className="bg-muted">
-                                <TableHead className="w-10 px-2">
-                                    <Checkbox
-                                        checked={isAllSelected}
-                                        onCheckedChange={toggleSelectAll}
-                                        aria-label="Select all"
-                                    />
-                                </TableHead>
-                                <TableHead className="px-2">Name</TableHead>
-                                <TableHead className="px-2">Price</TableHead>
-                                <TableHead className="px-2">Brand</TableHead>
-                                <TableHead className="px-2">Category</TableHead>
-                                <TableHead className="px-2">Stock</TableHead>
-                                <TableHead className="px-2 w-24">Status</TableHead>
-                                <TableHead className="text-right px-2 w-28">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-
-                        <TableBody className="divide-y divide-gray-200">
-                            {products.data.map((product, index) => (
-                                <TableRow
-                                    key={product.slug || product.id}
-                                    className="first:rounded-t-md last:rounded-b-md hover:bg-muted/40"
-                                >
-                                    <TableCell className="w-10 px-2">
-                                        <Checkbox
-                                            checked={selected.includes(product.slug!)}
-                                            onCheckedChange={() => toggleSelectOne(product.slug!)}
-                                            aria-label={`Select product ${product.name}`}
-                                        />
-                                    </TableCell>
-                                   
-                                    <TableCell className="px-2">{product.name}</TableCell>
-                                    <TableCell className="px-2">{product.price}</TableCell>
-                                    <TableCell className="px-2">
-                                        {product.brand?.name || '—'}
-                                    </TableCell>
-
-                                    <TableCell className="px-2">
-                                        {product.categories_list ||
-                                            product.categories?.map(c => c.name).join(', ') ||
-                                            '—'}
-                                    </TableCell>
-                                    <TableCell className="px-2">{product.quantity}</TableCell>
-                                    <TableCell className="px-2 w-24">
-                                        {product.is_active ? (
-                                            <span className="text-green-600">Active</span>
-                                        ) : (
-                                            <span className="text-red-600">Inactive</span>
-                                        )}
-                                    </TableCell>
-                                    <TableCell className="text-right px-2 w-28 space-x-2">
-                                        <Link href={`/dashboard/products/${product.slug}/edit`}>
-                                            <Button size="sm" variant="outline">
-                                                Edit
-                                            </Button>
-                                        </Link>
-                                        <DeleteAlert
-                                            onConfirm={() => handleDelete(product.slug!)}
-                                            trigger={<Button variant="destructive">Delete</Button>}
-                                            title="Delete Product"
-                                            description={`Are you sure you want to delete "${product.name}"?`}
-                                            confirmText="Delete"
-                                        />
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </Card>
-                <div className='flex justify-end'>
-                    <Pagination meta={products.meta} links={products.links} />
-                </div>
-
-            </div>
-        </AppLayout>
+  const toggleSelectOne = (slug: string) => {
+    setSelected((prev) =>
+      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug],
     );
+  };
+
+  const isAllSelected =
+    filteredProducts.length > 0 &&
+    selected.length === filteredProducts.length;
+
+  const handleDelete = (product: Product) => {
+    setDeleteProduct(product);
+  };
+
+  const confirmDelete = () => {
+    if (deleteProduct) {
+      router.delete(route("products.destroy", deleteProduct.slug));
+      setDeleteProduct(null);
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selected.length === 0) return;
+    router.post(route("products.bulk-delete"), { slugs: selected });
+    setSelected([]);
+  };
+
+  const handleEdit = (slug: string) => {
+    router.get(route("products.edit", slug));
+  };
+
+  const handleCreate = () => {
+    router.get(route("products.create"));
+  };
+
+  return (
+    <AppLayout>
+      <div className="container mx-auto py-8 px-4">
+        <div className="flex flex-col gap-6">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h1 className="text-3xl font-bold">Products</h1>
+              <p className="text-muted-foreground">Manage your product inventory</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {selected.length > 0 && (
+                <Button variant="destructive" onClick={handleBulkDelete}>
+                  <Package className="h-4 w-4 mr-2" />
+                  Delete Selected ({selected.length})
+                </Button>
+              )}
+              <Button onClick={handleCreate}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Product
+              </Button>
+            </div>
+          </div>
+
+          {/* Search and View Mode */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Search products..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant={viewMode === "grid" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("grid")}
+              >
+                <Grid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === "table" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("table")}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Products Grid or Table */}
+          {filteredProducts.length > 0 ? (
+            viewMode === "grid" ? (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredProducts.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      isSelected={selected.includes(product.slug)}
+                      onSelect={() => toggleSelectOne(product.slug)}
+                      onEdit={() => handleEdit(product.slug)}
+                      onDelete={() => handleDelete(product)}
+                    />
+                  ))}
+                </div>
+                <Pagination meta={products.meta} links={products.links} />
+              </>
+            ) : (
+              <>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-10">
+                          <Checkbox
+                            checked={isAllSelected}
+                            onCheckedChange={toggleSelectAll}
+                            aria-label="Select all"
+                          />
+                        </TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Price</TableHead>
+                        <TableHead>Brand</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Stock</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredProducts.map((product) => (
+                        <TableRow key={product.id} className="hover:bg-muted/40">
+                          <TableCell>
+                            <Checkbox
+                              checked={selected.includes(product.slug)}
+                              onCheckedChange={() => toggleSelectOne(product.slug)}
+                              aria-label={`Select product ${product.name}`}
+                            />
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {product.name}
+                          </TableCell>
+                          <TableCell>${formatPrice(product.price)}</TableCell>
+                          <TableCell>{product.brand?.name || "-"}</TableCell>
+                          <TableCell>
+                            {product.categories_list ||
+                              product.categories?.map((c) => c.name).join(", ") ||
+                              "-"}
+                          </TableCell>
+                          <TableCell>{product.quantity}</TableCell>
+                          <TableCell>
+                            <Badge variant={product.is_active ? "default" : "secondary"}>
+                              {product.is_active ? "Active" : "Inactive"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEdit(product.slug)}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-red-600 bg-transparent"
+                              onClick={() => handleDelete(product)}
+                            >
+                              Delete
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                <Pagination meta={products.meta} links={products.links} />
+              </>
+            )
+          ) : (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <div className="text-center">
+                  <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No products found</h3>
+                  <p className="text-muted-foreground mb-4">
+                    {searchTerm
+                      ? "Try adjusting your search terms"
+                      : "Get started by adding your first product"}
+                  </p>
+                  <Button onClick={handleCreate}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Product
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={!!deleteProduct} onOpenChange={() => setDeleteProduct(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the product "{deleteProduct?.name}" and remove it from our servers.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    </AppLayout>
+  );
 }
