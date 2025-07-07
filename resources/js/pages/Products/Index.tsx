@@ -17,7 +17,7 @@ import {
 import { Plus, Search, Grid, List, Package } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ProductCard } from "./Partials/ProductCard";
+import { ProductCard, ProductImage } from "./Partials/ProductCard";
 import AppLayout from "@/layouts/app-layout";
 import {
   Table,
@@ -43,6 +43,7 @@ interface Product {
   is_active: boolean;
   image?: string;
   description?: string;
+  main_image_url?: string; // ✅ Add this
 }
 
 interface Props {
@@ -207,6 +208,8 @@ export default function ProductsPage({ products }: Props) {
                             aria-label="Select all"
                           />
                         </TableHead>
+                        {/* image */}
+                        <TableHead>Image</TableHead>
                         <TableHead>Name</TableHead>
                         <TableHead>Price</TableHead>
                         <TableHead>Brand</TableHead>
@@ -225,6 +228,9 @@ export default function ProductsPage({ products }: Props) {
                               onCheckedChange={() => toggleSelectOne(product.slug)}
                               aria-label={`Select product ${product.name}`}
                             />
+                          </TableCell>
+                          <TableCell>
+                            <ProductImage src={product.main_image_url} alt={product.name} className="h-8 w-8 object-cover rounded" />
                           </TableCell>
                           <TableCell className="font-medium">
                             {product.name}

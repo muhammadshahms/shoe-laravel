@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Edit, Trash2, Package } from "lucide-react";
+import { useState } from "react";
 
 interface Product {
   id: string;
@@ -18,6 +19,7 @@ interface Product {
   is_active: boolean;
   image?: string;
   description?: string;
+  main_image_url?: string;
 }
 
 interface ProductCardProps {
@@ -27,6 +29,25 @@ interface ProductCardProps {
   onEdit: () => void;
   onDelete: () => void;
 }
+
+
+export function ProductImage({ src, alt, className }: { src: string | undefined; alt: string; className?: string }) {
+  const [imageError, setImageError] = useState(false);
+
+  if (!src || imageError) {
+    return <Package className="h-8 w-8 text-muted-foreground" />;
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      onError={() => setImageError(true)}
+    />
+  );
+}
+
 
 export function ProductCard({
   product,
@@ -48,9 +69,8 @@ export function ProductCard({
 
   return (
     <Card
-      className={`transition-all duration-200 hover:shadow-sm ${
-        isSelected ? "ring-2 ring-primary" : ""
-      }`}
+      className={`transition-all duration-200 hover:shadow-sm ${isSelected ? "ring-2 ring-primary" : ""
+        }`}
     >
       <CardHeader className="pb-2 pt-3 px-4">
         <div className="flex items-start justify-between">
@@ -79,15 +99,7 @@ export function ProductCard({
 
       <CardContent className="space-y-3 px-4 pb-4">
         <div className="aspect-video bg-muted rounded-md overflow-hidden flex items-center justify-center">
-          {product.image ? (
-            <img
-              src={product.image}
-              alt={product.name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <Package className="h-8 w-8 text-muted-foreground" />
-          )}
+          <ProductImage src={product.main_image_url} alt={product.name} className="w-full h-full object-cover" />
         </div>
 
         <div className="space-y-1">
@@ -101,9 +113,8 @@ export function ProductCard({
           <div className="flex justify-between items-center">
             <span className="text-xs text-muted-foreground">Stock</span>
             <span
-              className={`font-medium text-sm ${
-                product.quantity < 10 ? "text-red-600" : "text-green-600"
-              }`}
+              className={`font-medium text-sm ${product.quantity < 10 ? "text-red-600" : "text-green-600"
+                }`}
             >
               {product.quantity}
             </span>
@@ -147,6 +158,6 @@ export function ProductCard({
         </div>
       </CardContent>
     </Card>
-    
+
   );
 }

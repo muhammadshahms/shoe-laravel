@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Props } from '@/validations/product-schema';
 
-export default function Show({ product, brands, categories, mainImageUrl, galleryUrls }: Props) {
-    console.log({ product, mainImageUrl, galleryUrls });
+export default function Show({ product, brands, categories, main_image_url, gallery_urls }: Props) {
+    console.log({ product, main_image_url, gallery_urls });
 
     return (
         <AppLayout >
@@ -26,9 +26,9 @@ export default function Show({ product, brands, categories, mainImageUrl, galler
                     </CardHeader>
 
                     <CardContent>
-                        {mainImageUrl ? (
+                        {main_image_url ? (
                             <img
-                                src={mainImageUrl}
+                                src={main_image_url}
                                 alt={product?.name || 'Product image'}
                                 className="w-full h-auto rounded-md shadow"
                             />
@@ -44,11 +44,11 @@ export default function Show({ product, brands, categories, mainImageUrl, galler
                         )}
 
                         {/* Gallery */}
-                        {galleryUrls && galleryUrls.length > 0 && (
+                        {gallery_urls && gallery_urls.length > 0 && (
                             <div className="mt-6">
                                 <h3 className="text-lg font-semibold mb-2">Gallery</h3>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    {galleryUrls.map((url, i) => (
+                                    {gallery_urls.map((url, i) => (
                                         <img
                                             key={i}
                                             src={url}

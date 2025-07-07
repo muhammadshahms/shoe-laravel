@@ -24,11 +24,14 @@ class ProductController extends Controller
                     : $category->name;
             })->implode(', ');
 
+            // ✅ Add main_image_url
+            $product->main_image_url = $product->getFirstMediaUrl('main_image');
+
             return $product;
         });
 
         return Inertia::render('Products/Index', [
-            'products' => $products
+            'products' => $products,
         ]);
     }
 
@@ -79,7 +82,7 @@ class ProductController extends Controller
             'main_image' => 'nullable|image|max:2048',
             'gallery.*' => 'nullable|image|max:2048',
             'gallery' => ['nullable', 'array', 'max:8'],
-            
+
             'removedMainImage' => 'nullable|boolean',
             'removedGalleryIndexes' => 'nullable|array',
             'removedGalleryIndexes.*' => 'integer',
@@ -212,4 +215,16 @@ class ProductController extends Controller
 
         return redirect()->back()->with('success', 'Selected products deleted.');
     }
+
+    public function show(Product $product)
+    {
+        return Inertia::render('Products/Show', [
+            'product' => $product->load(['brand', 'categories']),
+            'main_image_url' => $product->getFirstMediaUrl('main_image'),
+            'gallery_urls' => $product->getMedia('gallery')->map->getUrl(),
+        ]);
+    }
+
+
+
 }
