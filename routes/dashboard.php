@@ -1,13 +1,20 @@
 <?php
-
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::prefix('dashboard')->middleware('auth')->group(function () {
-    // Dashboard main view
+    // Dashboard main view with admin check
     Route::get('/', function () {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        if (!$user->isAdmin()) {
+            abort(403, 'Unauthorized');
+        }
+
         return Inertia::render('dashboard');
     })->name('dashboard');
 

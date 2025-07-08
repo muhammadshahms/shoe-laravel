@@ -3,17 +3,36 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Order extends Model
 {
+    use SoftDeletes;
+
+    // ✅ Order Status Constants
+    const STATUS_PENDING = 'pending';
+    const STATUS_PROCESSING = 'processing';
+    const STATUS_COMPLETED = 'completed';
+    const STATUS_CANCELLED = 'cancelled';
+
     protected $fillable = [
         'user_id',
+        'is_guest',
+
+        // Order info
         'order_number',
         'status',
         'grand_total',
         'item_count',
+
+        // Payment
         'payment_status',
         'payment_method',
+
+        // Shipping
         'shipping_full_name',
         'shipping_address',
         'shipping_city',
@@ -21,36 +40,61 @@ class Order extends Model
         'shipping_zip_code',
         'shipping_country',
         'shipping_phone',
+
+        // Billing
         'billing_full_name',
+        'billing_email',
         'billing_address',
         'billing_city',
         'billing_state',
         'billing_zip_code',
         'billing_country',
         'billing_phone',
-        'notes'
+
+        // Other
+        'notes',
     ];
 
     protected $casts = [
         'grand_total' => 'float',
+        'is_guest' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
-    public function user()
+    protected $attributes = [
+        'status' => self::STATUS_PENDING,
+        'is_guest' => false,
+    ];
+
+    /**
+     * Relationship: Order belongs to User
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function items()
+    /**
+     * Relationship: Order has many items
+     */
+    public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
     }
 
-    public function shipment()
+    /**
+     * Relationship: Order has one shipment
+     */
+    public function shipment(): HasOne
     {
         return $this->hasOne(Shipment::class);
     }
 
-    public function transaction()
+    /**
+     * Relationship: Order has one transaction
+     */
+    public function transaction(): HasOne
     {
         return $this->hasOne(Transaction::class);
     }
