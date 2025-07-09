@@ -5,16 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
-
+    use HasRoles;
     protected $fillable = [
         'name',
         'email',
         'password',
-        'role', // ✅ added role here
+        // 'role', // ✅ added role here
     ];
 
     protected $hidden = [
@@ -35,8 +36,4 @@ class User extends Authenticatable
      *
      * @return bool
      */
-    public function isAdmin(): bool
-    {
-        return $this->role === 'admin';
-    }
 }

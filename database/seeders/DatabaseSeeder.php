@@ -6,7 +6,7 @@ use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 use Illuminate\Database\Seeder;
-
+use Spatie\Permission\Contracts\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -29,6 +29,8 @@ class DatabaseSeeder extends Seeder
             AttributeOptionSeeder::class,
             ProductSeeder::class,
             UserSeeder::class,
+            RoleSeeder::class,
+            RolePermissionSeeder::class
         ]);
 
     }

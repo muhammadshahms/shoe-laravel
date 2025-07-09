@@ -19,7 +19,6 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Admin',
                 'password' => Hash::make('password'), // 🔑 Change this in production
-                'role' => 'admin',
             ]
         );
 
@@ -29,7 +28,6 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Test User',
                 'password' => Hash::make('password'),
-                'role' => 'user',
             ]
         );
     }
