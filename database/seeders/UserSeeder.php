@@ -14,7 +14,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // ✅ Create Admin User
-        User::updateOrCreate(
+        $admin = User::updateOrCreate(
             ['email' => 'admin@example.com'],
             [
                 'name' => 'Admin',
@@ -22,13 +22,19 @@ class UserSeeder extends Seeder
             ]
         );
 
+        // 🔥 Assign admin role
+        $admin->assignRole('admin');
+
         // ✅ Optional: Create normal user for testing
-        User::updateOrCreate(
+        $user = User::updateOrCreate(
             ['email' => 'user@example.com'],
             [
                 'name' => 'Test User',
                 'password' => Hash::make('password'),
             ]
         );
+
+        // 🔥 Assign user role
+        $user->assignRole('user');
     }
 }

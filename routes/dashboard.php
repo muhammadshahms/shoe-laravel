@@ -7,7 +7,7 @@ use Inertia\Inertia;
 use Spatie\Permission\Middlewares\RoleMiddleware;
 
 
-Route::prefix('dashboard')->middleware(['auth', 'role:admin'])->group(function () {
+Route::prefix('dashboard')->middleware(['auth', 'admin'])->group(function () {
     // Dashboard main view
     Route::get('/', function () {
         return Inertia::render('dashboard');
