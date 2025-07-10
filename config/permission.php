@@ -167,7 +167,9 @@ return [
      */
 
     'enable_wildcard_permission' => false,
-
+    'defaults' => [
+        'guard' => 'web',
+    ],
     /*
      * The class to use for interpreting wildcard permissions.
      * If you need to modify delimiters, override the class and specify its name here.

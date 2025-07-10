@@ -6,13 +6,20 @@ use App\Models\Product;
 use App\Models\Brand;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
+    public function __construct()
+    {
+    }
+
     public function index()
     {
+
+
         $products = Product::with(['brand', 'categories.parent'])
             ->latest()
             ->paginate(10);

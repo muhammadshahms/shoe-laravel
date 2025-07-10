@@ -8,6 +8,7 @@ use Illuminate\Auth\Access\Response;
 
 class AttributeOptionPolicy
 {
+
     public function viewAny(User $user)
     {
         return $user->hasPermissionTo('viewAny AttributeOption')

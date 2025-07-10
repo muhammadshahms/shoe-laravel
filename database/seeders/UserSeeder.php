@@ -1,7 +1,7 @@
 <?php
 
 namespace Database\Seeders;
-
+use Spatie\Permission\Models\Role;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -13,19 +13,21 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        // 🔥 Ensure roles exist before assignment
+        $adminRole = Role::firstOrCreate(['name' => 'admin']);
+        $userRole = Role::firstOrCreate(['name' => 'user']);
+
         // ✅ Create Admin User
         $admin = User::updateOrCreate(
             ['email' => 'admin@example.com'],
             [
                 'name' => 'Admin',
-                'password' => Hash::make('password'), // 🔑 Change this in production
+                'password' => Hash::make('password'), // Change this in production
             ]
         );
+        $admin->assignRole($adminRole);
 
-        // 🔥 Assign admin role
-        $admin->assignRole('admin');
-
-        // ✅ Optional: Create normal user for testing
+        // ✅ Create normal user
         $user = User::updateOrCreate(
             ['email' => 'user@example.com'],
             [
@@ -33,8 +35,7 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('password'),
             ]
         );
-
-        // 🔥 Assign user role
-        $user->assignRole('user');
+        $user->assignRole($userRole);
     }
+
 }

@@ -2,18 +2,22 @@
 
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
+use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Spatie\Permission\Middlewares\RoleMiddleware;
 
 
-Route::prefix('dashboard')->middleware(['auth', 'admin'])->group(function () {
+Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     // Dashboard main view
+
+
     Route::get('/', function () {
+        Gate::authorize('dashboard');
         return Inertia::render('dashboard');
     })->name('dashboard');
 
-    // Settings redirect (FIXED path)
     Route::redirect('settings', 'settings/profile');
 
     // Profile settings

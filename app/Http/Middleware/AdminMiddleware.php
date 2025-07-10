@@ -18,7 +18,6 @@ class AdminMiddleware
         if (! $request->user() || ! $request->user()->hasRole('admin')) {
             abort(403, 'Unauthorized. Admins only.');
         }
-
         return $next($request);
     }
 }
