@@ -11,7 +11,9 @@ class AdminPolicy
      */
     public function dashboard(User $user): bool
     {
+
         return $user->hasRole('admin');
+
     }
 
     /**
@@ -21,8 +23,8 @@ class AdminPolicy
     {
         return $user->hasRole('admin');
     }
-    
-    
+
+
     public function password(User $user): bool
     {
         return $user->hasRole('admin');
@@ -31,5 +33,5 @@ class AdminPolicy
     /**
      * Determine whether the user can view the appearance.
      */
- 
+
 }
