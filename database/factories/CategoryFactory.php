@@ -31,7 +31,7 @@ class CategoryFactory extends Factory
     {
         return $this->afterCreating(function (Category $category) {
             // Seed banner image from placeholder
-            $category->addMediaFromUrl('https://loremflickr.com/640/480/category')
+            $category->addMediaFromUrl('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-40yXQw66Xo-dHiOiSF0Eq2eSVJ1-8pH6-w&s')
                 ->toMediaCollection('banner');
         });
     }

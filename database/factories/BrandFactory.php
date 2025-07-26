@@ -31,7 +31,7 @@ class BrandFactory extends Factory
     {
         return $this->afterCreating(function (Brand $brand) {
             // Seed logo image from placeholder
-            $brand->addMediaFromUrl('https://loremflickr.com/200/200/logo')
+            $brand->addMediaFromUrl('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-40yXQw66Xo-dHiOiSF0Eq2eSVJ1-8pH6-w&s')
                 ->toMediaCollection('logo');
         });
     }

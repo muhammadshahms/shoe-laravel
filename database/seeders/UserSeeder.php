@@ -1,33 +1,33 @@
 <?php
 
 namespace Database\Seeders;
-use Spatie\Permission\Models\Role;
+
 use Illuminate\Database\Seeder;
-use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use App\Models\User;
+use Spatie\Permission\Models\Role;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // 🔥 Ensure roles exist before assignment
-        $adminRole = Role::firstOrCreate(['name' => 'admin']);
-        $userRole = Role::firstOrCreate(['name' => 'user']);
+        // ✅ Create roles (idempotent)
+        Role::firstOrCreate(['name' => 'admin']);
+        Role::firstOrCreate(['name' => 'user']);
 
-        // ✅ Create Admin User
+        // ✅ Create or update Admin User
         $admin = User::updateOrCreate(
             ['email' => 'admin@example.com'],
             [
                 'name' => 'Admin',
-                'password' => Hash::make('password'), // Change this in production
+                'password' => Hash::make('password'), // 🔐 Change this in production
             ]
         );
-        $admin->assignRole($adminRole);
 
-        // ✅ Create normal user
+        // Assign 'admin' role (idempotent)
+        $admin->syncRoles('admin');
+
+        // ✅ Create or update Normal User
         $user = User::updateOrCreate(
             ['email' => 'user@example.com'],
             [
@@ -35,7 +35,8 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('password'),
             ]
         );
-        $user->assignRole($userRole);
-    }
 
+        // Assign 'user' role (idempotent)
+        $user->syncRoles('user');
+    }
 }
