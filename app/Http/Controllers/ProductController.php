@@ -18,8 +18,6 @@ class ProductController extends Controller
 
     public function index()
     {
-
-
         $products = Product::with(['brand', 'categories.parent'])
             ->latest()
             ->paginate(10);
@@ -232,6 +230,26 @@ class ProductController extends Controller
         ]);
     }
 
+    public function shop()
+    {
+        $products = Product::with(['brand', 'categories.parent'])
+            ->where('is_active', true)
+            ->latest()
+            ->paginate(12);
 
+        $products->getCollection()->transform(function ($product) {
+            $product->categories_list = $product->categories->map(function ($category) {
+                return $category->parent
+                    ? $category->parent->name . ' > ' . $category->name
+                    : $category->name;
+            })->implode(', ');
 
+            $product->main_image_url = $product->getFirstMediaUrl('main_image');
+
+            return $product;
+        });
+        return Inertia::render('Shop/Index', [
+            'products' => $products,
+        ]);
+    }
 }
