@@ -269,7 +269,7 @@ const Header = () => {
                             </Button>
 
                             {/* Notifications */}
-                            <Button
+                            {/* <Button
                                 variant="ghost"
                                 size="icon"
                                 className="relative text-white hover:text-yellow-400 hover:bg-gray-800"
@@ -280,10 +280,10 @@ const Header = () => {
                                         {notificationCount}
                                     </Badge>
                                 )}
-                            </Button>
+                            </Button> */}
 
                             {/* Wishlist */}
-                            <Button
+                            {/* <Button
                                 variant="ghost"
                                 size="icon"
                                 className="relative text-white hover:text-yellow-400 hover:bg-gray-800"
@@ -294,7 +294,7 @@ const Header = () => {
                                         {wishlistCount}
                                     </Badge>
                                 )}
-                            </Button>
+                            </Button> */}
 
                             {/* Shopping Cart */}
                             <Button

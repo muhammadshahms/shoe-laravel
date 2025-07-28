@@ -1,11 +1,13 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Star, ShoppingCart, Heart } from "lucide-react"
+import { Star, ShoppingCart, Heart, Minus, Plus, Trash2 } from "lucide-react"
 import { motion } from "framer-motion"
 import { useState } from "react"
+import { useCart } from "@/hooks/use-cart" // Import the useCart hook
 
 interface ProductCardProps {
+  id: number // Add product ID to props
   title: string
   price: string
   originalPrice?: string
@@ -13,12 +15,13 @@ interface ProductCardProps {
   reviews: string
   image: string
   onViewDetails?: () => void
-  onAddToCart?: () => void
+  onAddToCart?: () => void // This prop is used for the initial add to cart
   className?: string
   showDiscount?: boolean
 }
 
 export default function ProductCard({
+  id, // Destructure id from props
   title,
   price,
   originalPrice,
@@ -31,6 +34,8 @@ export default function ProductCard({
   showDiscount = false,
 }: ProductCardProps) {
   const [isWishlisted, setIsWishlisted] = useState(false)
+  const { cartItems, removeItem, updateItemQuantity } = useCart() // Get cart functions
+  const currentProductInCart = cartItems.find((item) => item.id === id) // Find this product in cart
 
   return (
     <motion.div
@@ -44,7 +49,6 @@ export default function ProductCard({
       <div className="relative rounded-3xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 p-6 shadow-2xl hover:shadow-yellow-400/20 transition-all duration-500 overflow-hidden">
         {/* Background Gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
         {/* Product Image */}
         <div className="relative mb-6">
           <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl p-4 backdrop-blur-sm">
@@ -56,19 +60,16 @@ export default function ProductCard({
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
             />
           </div>
-
           {/* Rating Badge */}
           <div className="absolute top-3 right-3 bg-gradient-to-r from-yellow-400 to-orange-400 text-black px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
             ⭐ {rating} ({reviews})
           </div>
-
           {/* Discount Badge */}
           {showDiscount && originalPrice && (
             <div className="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
               25% OFF
             </div>
           )}
-
           {/* Wishlist Button */}
           <motion.button
             className="absolute bottom-3 left-3 w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20 hover:bg-white/20 transition-all duration-300"
@@ -81,22 +82,18 @@ export default function ProductCard({
             />
           </motion.button>
         </div>
-
         {/* Product Info */}
         <div className="relative z-10">
           <h4 className="text-white text-xl font-bold mb-2 group-hover:text-yellow-400 transition-colors duration-300">
             {title}
           </h4>
-
           <div className="flex items-center gap-3 mb-2">
             <p className="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
               {price}
             </p>
             {originalPrice && <p className="text-lg text-gray-400 line-through">{originalPrice}</p>}
           </div>
-
           <p className="text-gray-400 text-sm mb-3">Premium Collection 2024</p>
-
           {/* Star Rating */}
           <div className="flex items-center gap-1 mb-6">
             {[...Array(5)].map((_, idx) => (
@@ -104,7 +101,6 @@ export default function ProductCard({
             ))}
             <span className="text-gray-400 text-sm ml-2">({reviews})</span>
           </div>
-
           {/* Action Buttons */}
           <div className="flex gap-3">
             <Button
@@ -113,17 +109,50 @@ export default function ProductCard({
             >
               View Details
             </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="border-white/20 text-white hover:bg-white/10 rounded-xl backdrop-blur-sm bg-transparent"
-              onClick={onAddToCart}
-            >
-              <ShoppingCart className="w-4 h-4" />
-            </Button>
+            {currentProductInCart ? (
+              // Quantity controls if product is in cart
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="border-white/20 text-white hover:bg-white/10 rounded-xl backdrop-blur-sm bg-transparent"
+                  onClick={() => {
+                    if (currentProductInCart.quantity === 1) {
+                      removeItem(id)
+                    } else {
+                      updateItemQuantity(id, currentProductInCart.quantity - 1)
+                    }
+                  }}
+                >
+                  {currentProductInCart.quantity === 1 ? (
+                    <Trash2 className="w-4 h-4 text-red-400" />
+                  ) : (
+                    <Minus className="w-4 h-4" />
+                  )}
+                </Button>
+                <span className="text-white font-semibold">{currentProductInCart.quantity}</span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="border-white/20 text-white hover:bg-white/10 rounded-xl backdrop-blur-sm bg-transparent"
+                  onClick={() => updateItemQuantity(id, currentProductInCart.quantity + 1)}
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+            ) : (
+              // Add to Cart button if product is not in cart
+              <Button
+                variant="outline"
+                size="icon"
+                className="border-white/20 text-white hover:bg-white/10 rounded-xl backdrop-blur-sm bg-transparent"
+                onClick={onAddToCart} // Use the prop for initial add
+              >
+                <ShoppingCart className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         </div>
-
         {/* Shine Effect */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>

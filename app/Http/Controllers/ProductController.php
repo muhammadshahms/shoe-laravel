@@ -230,13 +230,84 @@ class ProductController extends Controller
         ]);
     }
 
-    public function shop()
+    public function shop(Request $request)
     {
-        $products = Product::with(['brand', 'categories.parent'])
-            ->where('is_active', true)
-            ->latest()
-            ->paginate(12);
+        $query = Product::with(['brand', 'categories.parent'])
+            ->where('is_active', true);
 
+        // Apply filters from request
+        if ($request->has('search')) {
+            $search = $request->get('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('short_description', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->has('category') && $request->get('category') !== 'All') {
+            $category = $request->get('category');
+            $query->whereHas('categories', function ($q) use ($category) {
+                $q->where('name', 'like', "%{$category}%")
+                    ->orWhereHas('parent', function ($q2) use ($category) {
+                        $q2->where('name', 'like', "%{$category}%");
+                    });
+            });
+        }
+
+        if ($request->has('brand') && $request->get('brand') !== 'All') {
+            $brandName = $request->get('brand');
+            $query->whereHas('brand', function ($q) use ($brandName) {
+                $q->where('name', $brandName);
+            });
+        }
+
+        if ($request->has('min_price')) {
+            $query->where('price', '>=', $request->get('min_price'));
+        }
+
+        if ($request->has('max_price')) {
+            $query->where('price', '<=', $request->get('max_price'));
+        }
+
+        if ($request->has('on_sale') && $request->get('on_sale')) {
+            $query->whereNotNull('special_price')
+                ->where('special_price_start', '<=', now())
+                ->where('special_price_end', '>=', now());
+        }
+
+        if ($request->has('featured') && $request->get('featured')) {
+            $query->where('is_featured', true);
+        }
+
+        if ($request->has('in_stock') && $request->get('in_stock')) {
+            $query->where('in_stock', true);
+        }
+
+        // Apply sorting
+        $sortBy = $request->get('sort', 'featured');
+        switch ($sortBy) {
+            case 'price-low':
+                $query->orderBy('price', 'asc');
+                break;
+            case 'price-high':
+                $query->orderBy('price', 'desc');
+                break;
+            case 'newest':
+                $query->latest();
+                break;
+            case 'name':
+                $query->orderBy('name', 'asc');
+                break;
+            case 'featured':
+            default:
+                $query->orderBy('is_featured', 'desc')->latest();
+                break;
+        }
+
+        $products = $query->paginate(12);
+
+        // Transform products
         $products->getCollection()->transform(function ($product) {
             $product->categories_list = $product->categories->map(function ($category) {
                 return $category->parent
@@ -244,12 +315,20 @@ class ProductController extends Controller
                     : $category->name;
             })->implode(', ');
 
-            $product->main_image_url = $product->getFirstMediaUrl('main_image');
+            $product->main_image_url = $product->getFirstMediaUrl('main_image') ?: '/images/default-product.png';
 
             return $product;
         });
+
+        // Get all brands and categories for filters
+        $brands = Brand::orderBy('name')->get();
+        $categories = Category::whereNull('parent_id')->with('children')->orderBy('name')->get();
+
         return Inertia::render('Shop/Index', [
             'products' => $products,
+            'brands' => $brands,
+            'categories' => $categories->pluck('name'),
+            'filters' => $request->only(['search', 'category', 'brand', 'min_price', 'max_price', 'on_sale', 'featured', 'in_stock', 'sort'])
         ]);
     }
 }
