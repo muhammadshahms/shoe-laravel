@@ -180,23 +180,8 @@ export default function ShopPage() {
   return (
     <>
       <div className="text-white min-h-screen font-sans bg-gradient-to-b from-gray-900 via-black to-gray-900 relative overflow-hidden">
-        <Header>
-          {/* Add cart button to Header */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative text-white hover:bg-white/10"
-            onClick={() => setIsCartOpen(true)}
-          >
-            <ShoppingCart className="w-6 h-6" />
-            {cartItemCount > 0 && (
-              <Badge className="absolute -top-1 -right-1 bg-yellow-400 text-black rounded-full px-2 py-0.5 text-xs font-bold">
-                {cartItemCount}
-              </Badge>
-            )}
-            <span className="sr-only">View Cart</span>
-          </Button>
-        </Header>
+        <Header />
+
         {/* Background Effects */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-yellow-400/10 rounded-full blur-3xl"></div>
@@ -220,10 +205,10 @@ export default function ShopPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-gray-400 hover:text-white"
+                          className="text-gray-400 hover:text-white hover:bg-white/10"
                           onClick={clearFilters}
                         >
-                          <X className="w-4 h-4 mr-1" />
+                          <X className="w-4 h-4 mr-1 " />
                           Clear
                         </Button>
                       </div>
@@ -240,9 +225,9 @@ export default function ShopPage() {
                                   variant="outline"
                                   role="combobox"
                                   aria-expanded={searchOpen}
-                                  className="w-full justify-start bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20"
+                                  className="w-full justify-start bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 hover:text-zinc-300"
                                 >
-                                  <Search className="w-4 h-4 mr-2 text-gray-400" />
+                                  <Search className="w-4 h-4 mr-2 text-gray-400 " />
                                   {currentFilters.search || "Search products..."}
                                 </Button>
                               </PopoverTrigger>
@@ -252,7 +237,7 @@ export default function ShopPage() {
                                     placeholder="Search products..."
                                     value={currentFilters.search}
                                     onValueChange={(value) => handleFilterChange("search", value)}
-                                    className="text-white"
+                                    className="text-white "
                                   />
                                   <CommandList>
                                     <CommandEmpty>No products found.</CommandEmpty>
@@ -286,11 +271,10 @@ export default function ShopPage() {
                                 <Button
                                   key={category}
                                   variant={currentFilters.category === category ? "default" : "ghost"}
-                                  className={`w-full justify-start ${
-                                    currentFilters.category === category
-                                      ? "bg-gradient-to-r from-yellow-400 to-orange-400 text-black hover:from-yellow-300 hover:to-orange-300"
-                                      : "text-white hover:bg-white/10"
-                                  }`}
+                                  className={`w-full justify-start ${currentFilters.category === category
+                                    ? "bg-gradient-to-r from-yellow-400 to-orange-400 text-black hover:from-yellow-300 hover:to-orange-300"
+                                    : "text-white hover:bg-white/10  hover:text-yellow-400"
+                                    }`}
                                   onClick={() => handleFilterChange("category", category)}
                                 >
                                   {category}
@@ -406,7 +390,7 @@ export default function ShopPage() {
                             <DropdownMenuTrigger asChild>
                               <Button
                                 variant="outline"
-                                className="border-white/20 text-white hover:bg-white/10 bg-white/5"
+                                className="border-white/20 text-white hover:bg-white/10 bg-white/5 hover:text-zinc-300"
                               >
                                 <ArrowUpDown className="w-4 h-4 mr-2" />
                                 Sort
@@ -453,11 +437,10 @@ export default function ShopPage() {
                                         <Button
                                           key={category}
                                           variant={currentFilters.category === category ? "default" : "ghost"}
-                                          className={`w-full justify-start ${
-                                            currentFilters.category === category
-                                              ? "bg-gradient-to-r from-yellow-400 to-orange-400 text-black"
-                                              : "text-white hover:bg-white/10"
-                                          }`}
+                                          className={`w-full justify-start ${currentFilters.category === category
+                                            ? "bg-gradient-to-r from-yellow-400 to-orange-400 text-black"
+                                            : "text-white hover:bg-white/10"
+                                            }`}
                                           onClick={() => handleFilterChange("category", category)}
                                         >
                                           {category}
@@ -563,58 +546,57 @@ export default function ShopPage() {
                         currentFilters.on_sale ||
                         currentFilters.featured ||
                         currentFilters.in_stock) && (
-                        <div className="flex items-center gap-2 flex-wrap mt-4 pt-4 border-t border-white/10">
-                          <span className="text-sm text-gray-400">Active filters:</span>
-                          {currentFilters.search && (
-                            <Badge
-                              variant="secondary"
-                              className="bg-yellow-400/20 text-yellow-400 border-yellow-400/30"
-                            >
-                              Search: {currentFilters.search}
-                            </Badge>
-                          )}
-                          {currentFilters.category !== "All" && (
-                            <Badge variant="secondary" className="bg-cyan-400/20 text-cyan-400 border-cyan-400/30">
-                              {currentFilters.category}
-                            </Badge>
-                          )}
-                          {currentFilters.brand !== "All" && (
-                            <Badge variant="secondary" className="bg-pink-400/20 text-pink-400 border-pink-400/30">
-                              {currentFilters.brand}
-                            </Badge>
-                          )}
-                          {currentFilters.on_sale && (
-                            <Badge variant="secondary" className="bg-green-400/20 text-green-400 border-green-400/30">
-                              On Sale
-                            </Badge>
-                          )}
-                          {currentFilters.featured && (
-                            <Badge
-                              variant="secondary"
-                              className="bg-purple-400/20 text-purple-400 border-purple-400/30"
-                            >
-                              Featured
-                            </Badge>
-                          )}
-                          {currentFilters.in_stock && (
-                            <Badge
-                              variant="secondary"
-                              className="bg-orange-400/20 text-orange-400 border-orange-400/30"
-                            >
-                              In Stock
-                            </Badge>
-                          )}
-                        </div>
-                      )}
+                          <div className="flex items-center gap-2 flex-wrap mt-4 pt-4 border-t border-white/10">
+                            <span className="text-sm text-gray-400">Active filters:</span>
+                            {currentFilters.search && (
+                              <Badge
+                                variant="secondary"
+                                className="bg-yellow-400/20 text-yellow-400 border-yellow-400/30"
+                              >
+                                Search: {currentFilters.search}
+                              </Badge>
+                            )}
+                            {currentFilters.category !== "All" && (
+                              <Badge variant="secondary" className="bg-cyan-400/20 text-cyan-400 border-cyan-400/30">
+                                {currentFilters.category}
+                              </Badge>
+                            )}
+                            {currentFilters.brand !== "All" && (
+                              <Badge variant="secondary" className="bg-pink-400/20 text-pink-400 border-pink-400/30">
+                                {currentFilters.brand}
+                              </Badge>
+                            )}
+                            {currentFilters.on_sale && (
+                              <Badge variant="secondary" className="bg-green-400/20 text-green-400 border-green-400/30">
+                                On Sale
+                              </Badge>
+                            )}
+                            {currentFilters.featured && (
+                              <Badge
+                                variant="secondary"
+                                className="bg-purple-400/20 text-purple-400 border-purple-400/30"
+                              >
+                                Featured
+                              </Badge>
+                            )}
+                            {currentFilters.in_stock && (
+                              <Badge
+                                variant="secondary"
+                                className="bg-orange-400/20 text-orange-400 border-orange-400/30"
+                              >
+                                In Stock
+                              </Badge>
+                            )}
+                          </div>
+                        )}
                     </CardContent>
                   </Card>
                   {/* Products Grid */}
                   {products.data.length > 0 ? (
                     <>
                       <motion.div
-                        className={`grid gap-6 ${
-                          viewMode === "grid" ? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3" : "grid-cols-1"
-                        }`}
+                        className={`grid gap-6 ${viewMode === "grid" ? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3" : "grid-cols-1"
+                          }`}
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
@@ -699,7 +681,6 @@ export default function ShopPage() {
         </div>
         <Footer />
       </div>
-      <CartSheet isOpen={isCartOpen} onOpenChange={setIsCartOpen} />
       <Toaster richColors position="bottom-right" /> {/* Add Toaster component */}
     </>
   )

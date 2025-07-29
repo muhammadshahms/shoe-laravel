@@ -145,10 +145,10 @@ export default function ProductCard({
               <Button
                 variant="outline"
                 size="icon"
-                className="border-white/20 text-white hover:bg-white/10 rounded-xl backdrop-blur-sm bg-transparent"
+                className="border-white/20 text-white hover:bg-white/10 rounded-xl backdrop-blur-sm bg-transparent hover:text-yellow-400"
                 onClick={onAddToCart} // Use the prop for initial add
               >
-                <ShoppingCart className="w-4 h-4" />
+                <ShoppingCart className="w-4 h-4 " />
               </Button>
             )}
           </div>

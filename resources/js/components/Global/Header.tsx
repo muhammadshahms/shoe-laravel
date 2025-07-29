@@ -25,6 +25,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useState, useEffect } from "react"
 import AppLogoIcon from "../app-logo-icon"
 import AppLogo from "../app-logo"
+import { useCart } from "@/hooks/use-cart"
+import { CartSheet } from "../CartSheet"
 
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -35,6 +37,8 @@ const Header = () => {
     const [cartCount] = useState(3)
     const [wishlistCount] = useState(5)
     const [notificationCount] = useState(2)
+    const { addItem, cartItemCount } = useCart() // Use the cart hook
+    const [isCartOpen, setIsCartOpen] = useState(false) // State for cart sheet
 
     // Handle scroll effect
     useEffect(() => {
@@ -300,16 +304,18 @@ const Header = () => {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="relative text-white hover:text-yellow-400 hover:bg-gray-800"
+                                className="relative text-white hover:bg-white/10 hover:text-yellow-400"
+                                onClick={() => setIsCartOpen(true)}
                             >
-                                <ShoppingCart className="w-5 h-5" />
-                                {cartCount > 0 && (
-                                    <Badge className="absolute -top-1 -right-1 bg-yellow-400 text-black text-xs w-5 h-5 rounded-full flex items-center justify-center p-0">
-                                        {cartCount}
+                                <ShoppingCart className="w-6 h-6 " />
+                                {cartItemCount > 0 && (
+                                    <Badge className="absolute -top-1 -right-1 bg-yellow-400 text-black rounded-full px-2 py-0.5 text-xs font-bold">
+                                        {cartItemCount}
                                     </Badge>
                                 )}
+                                <span className="sr-only">View Cart</span>
                             </Button>
-
+                                
                             {/* User Menu */}
                             <div className="relative">
                                 <Button
@@ -445,6 +451,8 @@ const Header = () => {
                     }}
                 />
             )}
+            <CartSheet isOpen={isCartOpen} onOpenChange={setIsCartOpen} />
+
         </>
     )
 }
