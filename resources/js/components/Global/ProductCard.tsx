@@ -1,13 +1,12 @@
 "use client"
-
 import { Button } from "@/components/ui/button"
 import { Star, ShoppingCart, Heart, Minus, Plus, Trash2 } from "lucide-react"
 import { motion } from "framer-motion"
 import { useState } from "react"
-import { useCart } from "@/hooks/use-cart" // Import the useCart hook
+import { useCartStore } from "@/hooks/cart-store"
 
 interface ProductCardProps {
-  id: number // Add product ID to props
+  id: number
   title: string
   price: string
   originalPrice?: string
@@ -15,13 +14,12 @@ interface ProductCardProps {
   reviews: string
   image: string
   onViewDetails?: () => void
-  onAddToCart?: () => void // This prop is used for the initial add to cart
   className?: string
   showDiscount?: boolean
 }
 
 export default function ProductCard({
-  id, // Destructure id from props
+  id,
   title,
   price,
   originalPrice,
@@ -29,13 +27,33 @@ export default function ProductCard({
   reviews,
   image,
   onViewDetails,
-  onAddToCart,
   className = "",
   showDiscount = false,
 }: ProductCardProps) {
   const [isWishlisted, setIsWishlisted] = useState(false)
-  const { cartItems, removeItem, updateItemQuantity } = useCart() // Get cart functions
-  const currentProductInCart = cartItems.find((item) => item.id === id) // Find this product in cart
+
+  // Select only the necessary parts of the store
+  const cartItems = useCartStore((state) => state.cartItems)
+  const addItem = useCartStore((state) => state.addItem)
+  const removeItem = useCartStore((state) => state.removeItem)
+  const updateItemQuantity = useCartStore((state) => state.updateItemQuantity)
+
+  const currentProductInCart = cartItems.find((item) => item.id === id)
+
+  const handleAddToCart = () => {
+    const numericPrice = Number.parseFloat(price.replace(/[^0-9.-]+/g, ""))
+    if (isNaN(numericPrice)) {
+      console.error("Invalid price for product:", title, price)
+      return
+    }
+
+    addItem({
+      id,
+      name: title,
+      price: numericPrice,
+      main_image_url: image,
+    })
+  }
 
   return (
     <motion.div
@@ -53,7 +71,7 @@ export default function ProductCard({
         <div className="relative mb-6">
           <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl p-4 backdrop-blur-sm">
             <motion.img
-              src={image || "/placeholder.svg"}
+              src={image || "/placeholder.svg?height=192&width=192&query=product"}
               alt={title}
               className="w-full h-48 object-contain drop-shadow-lg"
               whileHover={{ scale: 1.1, rotate: 5 }}
@@ -146,7 +164,7 @@ export default function ProductCard({
                 variant="outline"
                 size="icon"
                 className="border-white/20 text-white hover:bg-white/10 rounded-xl backdrop-blur-sm bg-transparent hover:text-yellow-400"
-                onClick={onAddToCart} // Use the prop for initial add
+                onClick={handleAddToCart}
               >
                 <ShoppingCart className="w-4 h-4 " />
               </Button>

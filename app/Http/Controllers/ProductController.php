@@ -331,4 +331,16 @@ class ProductController extends Controller
             'filters' => $request->only(['search', 'category', 'brand', 'min_price', 'max_price', 'on_sale', 'featured', 'in_stock', 'sort'])
         ]);
     }
+
+    // product detail
+    public function productDetail(Product $product)
+    {
+        $product->load(['brand', 'categories']);
+        $product->main_image_url = $product->getFirstMediaUrl('main_image') ?: '/images/default-product.png';
+        $product->gallery_urls = $product->getMedia('gallery')->map->getUrl();
+
+        return Inertia::render('ProductDetails/Index', [
+            'product' => $product,
+        ]);
+    }
 }

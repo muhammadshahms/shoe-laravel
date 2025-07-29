@@ -1,5 +1,4 @@
 "use client"
-
 import { usePage, router } from "@inertiajs/react"
 import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
@@ -20,12 +19,11 @@ import { motion } from "framer-motion"
 import Header from "@/components/Global/Header"
 import ProductCard from "@/components/Global/ProductCard"
 import Footer from "@/components/Global/Footer"
-import LoadingOverlay from "@/components/ui/loading-overlay" // Import the new component
+import LoadingOverlay from "@/components/ui/loading-overlay"
 import { useDebounce } from "@/hooks/use-debounce"
-import { useCart } from "@/hooks/use-cart" // Import the useCart hook
-import { Toaster } from "sonner" // Import Toaster for toasts
+import { Toaster } from "sonner"
+import { selectCartItemCount, useCartStore } from "@/hooks/cart-store"
 import { CartSheet } from "@/components/CartSheet"
-// import CartSheet from "@/components/cart-sheet" // Import the new CartSheet component
 
 // Define types based on Laravel's Inertia props
 interface Product {
@@ -33,13 +31,14 @@ interface Product {
   name: string
   price: number
   special_price?: number
-  rating?: number // Assuming a rating field
-  reviews_count?: number // Assuming a reviews count field
+  rating?: number
+  reviews_count?: number
   main_image_url: string
   is_active: boolean
   is_featured: boolean
   in_stock: boolean
   categories_list: string
+  slug: string
 }
 
 interface Brand {
@@ -58,7 +57,7 @@ interface InertiaProps {
     to: number
   }
   brands: Brand[]
-  categories: string[] // Plucked names from Laravel
+  categories: string[]
   filters: {
     search?: string
     category?: string
@@ -66,7 +65,7 @@ interface InertiaProps {
     min_price?: number
     max_price?: number
     on_sale?: boolean
-    featured?: boolean // Corresponds to is_featured
+    featured?: boolean
     in_stock?: boolean
     sort?: string
   }
@@ -75,15 +74,15 @@ interface InertiaProps {
 export default function ShopPage() {
   const { products, brands, categories, filters } = usePage<InertiaProps>().props
   const { processing } = router as any
-  const { addItem, cartItemCount } = useCart() // Use the cart hook
-  const [isCartOpen, setIsCartOpen] = useState(false) // State for cart sheet
+  const cartItemCount = useCartStore(selectCartItemCount) // Use the selector for item count
+  const [isCartOpen, setIsCartOpen] = useState(false)
 
   const [currentFilters, setCurrentFilters] = useState({
     search: filters.search || "",
     category: filters.category || "All",
     brand: filters.brand || "All",
     min_price: filters.min_price ?? 0,
-    max_price: filters.max_price ?? 300, // Default max price, adjust as needed
+    max_price: filters.max_price ?? 300,
     on_sale: filters.on_sale || false,
     featured: filters.featured || false,
     in_stock: filters.in_stock || false,
@@ -92,24 +91,22 @@ export default function ShopPage() {
 
   const debouncedSearchQuery = useDebounce(currentFilters.search, 500)
 
-  // Effect to apply filters when currentFilters or debouncedSearchQuery changes
   useEffect(() => {
     const queryParams: Record<string, any> = {}
     if (debouncedSearchQuery) queryParams.search = debouncedSearchQuery
     if (currentFilters.category !== "All") queryParams.category = currentFilters.category
     if (currentFilters.brand !== "All") queryParams.brand = currentFilters.brand
     if (currentFilters.min_price !== 0) queryParams.min_price = currentFilters.min_price
-    if (currentFilters.max_price !== 300) queryParams.max_price = currentFilters.max_price // Adjust default max
+    if (currentFilters.max_price !== 300) queryParams.max_price = currentFilters.max_price
     if (currentFilters.on_sale) queryParams.on_sale = true
     if (currentFilters.featured) queryParams.featured = true
     if (currentFilters.in_stock) queryParams.in_stock = true
     if (currentFilters.sort !== "featured") queryParams.sort = currentFilters.sort
 
-    // Use router.get to make an Inertia request to the current page path
     router.get(window.location.pathname, queryParams, {
       preserveState: true,
       preserveScroll: true,
-      replace: true, // Replace history entry instead of pushing a new one
+      replace: true,
     })
   }, [
     debouncedSearchQuery,
@@ -137,7 +134,7 @@ export default function ShopPage() {
       category: "All",
       brand: "All",
       min_price: 0,
-      max_price: 300, // Keep consistent default max
+      max_price: 300,
       on_sale: false,
       featured: false,
       in_stock: false,
@@ -156,8 +153,8 @@ export default function ShopPage() {
   ]
 
   const [searchOpen, setSearchOpen] = useState(false)
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid") // Keeping viewMode client-side
-  const maxPrice = 300 // This should ideally come from backend props, e.g., `max_available_price`
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const maxPrice = 300
 
   const formatPrice = (price: number | string | undefined): string => {
     if (typeof price === "number") {
@@ -181,7 +178,6 @@ export default function ShopPage() {
     <>
       <div className="text-white min-h-screen font-sans bg-gradient-to-b from-gray-900 via-black to-gray-900 relative overflow-hidden">
         <Header />
-
         {/* Background Effects */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-yellow-400/10 rounded-full blur-3xl"></div>
@@ -272,8 +268,8 @@ export default function ShopPage() {
                                   key={category}
                                   variant={currentFilters.category === category ? "default" : "ghost"}
                                   className={`w-full justify-start ${currentFilters.category === category
-                                    ? "bg-gradient-to-r from-yellow-400 to-orange-400 text-black hover:from-yellow-300 hover:to-orange-300"
-                                    : "text-white hover:bg-white/10  hover:text-yellow-400"
+                                      ? "bg-gradient-to-r from-yellow-400 to-orange-400 text-black hover:from-yellow-300 hover:to-orange-300"
+                                      : "text-white hover:bg-white/10  hover:text-yellow-400"
                                     }`}
                                   onClick={() => handleFilterChange("category", category)}
                                 >
@@ -385,6 +381,21 @@ export default function ShopPage() {
                         </div>
                         {/* Controls */}
                         <div className="flex items-center gap-4">
+                          {/* Cart Button */}
+                          <Button
+                            variant="outline"
+                            size="lg"
+                            className="border-white/20 text-white hover:bg-white/10 shrink-0 relative bg-transparent"
+                            onClick={() => setIsCartOpen(true)}
+                          >
+                            <ShoppingCart className="w-5 h-5 mr-2" />
+                            Cart
+                            {cartItemCount > 0 && (
+                              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                                {cartItemCount}
+                              </span>
+                            )}
+                          </Button>
                           {/* Sort Dropdown */}
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -438,8 +449,8 @@ export default function ShopPage() {
                                           key={category}
                                           variant={currentFilters.category === category ? "default" : "ghost"}
                                           className={`w-full justify-start ${currentFilters.category === category
-                                            ? "bg-gradient-to-r from-yellow-400 to-orange-400 text-black"
-                                            : "text-white hover:bg-white/10"
+                                              ? "bg-gradient-to-r from-yellow-400 to-orange-400 text-black"
+                                              : "text-white hover:bg-white/10"
                                             }`}
                                           onClick={() => handleFilterChange("category", category)}
                                         >
@@ -609,7 +620,7 @@ export default function ShopPage() {
                             transition={{ duration: 0.4, delay: index * 0.1 }}
                           >
                             <ProductCard
-                              id={product.id} // Pass product ID
+                              id={product.id}
                               title={product.name}
                               price={formatPrice(product.price)}
                               originalPrice={product.special_price ? formatPrice(product.special_price) : undefined}
@@ -617,14 +628,13 @@ export default function ShopPage() {
                               reviews={formatReviews(product.reviews_count || 0)}
                               image={product.main_image_url}
                               showDiscount={!!product.special_price}
-                              onViewDetails={() => console.log("View details:", product.name)}
-                              onAddToCart={() => addItem(product)} // Pass the product object to addItem
+                              onViewDetails={() => router.get(`/product-details/${product.slug}`)}
                             />
                           </motion.div>
                         ))}
                       </motion.div>
                       {/* Pagination */}
-                      {products.links.length > 3 && ( // Only show pagination if there are more than just prev/next links
+                      {products.links.length > 3 && (
                         <motion.div
                           className="flex justify-center items-center gap-4 mt-12"
                           initial={{ opacity: 0, y: 20 }}
@@ -681,7 +691,8 @@ export default function ShopPage() {
         </div>
         <Footer />
       </div>
-      <Toaster richColors position="bottom-right" /> {/* Add Toaster component */}
+      <Toaster richColors position="bottom-right" />
+      <CartSheet isOpen={isCartOpen} onOpenChange={setIsCartOpen} />
     </>
   )
 }
