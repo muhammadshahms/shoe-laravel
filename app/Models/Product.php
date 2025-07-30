@@ -10,7 +10,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
-class Product extends Model implements HasMedia
+class   Product extends Model implements HasMedia
 {
     use InteractsWithMedia, HasSlug;
     use SoftDeletes;

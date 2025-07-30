@@ -25,34 +25,49 @@ import ProductCard from "@/components/Global/ProductCard"
 import Footer from "@/components/Global/Footer"
 
 // Product data
-const product = {
-  id: 1,
-  title: "Nike Air Max 270 React",
-  price: "$210",
-  originalPrice: "$280",
-  rating: 4.9,
-  reviews: "2.5k+",
-  description:
-    "The Nike Air Max 270 React combines two of Nike's most innovative technologies for unparalleled comfort and style. Featuring the largest heel Air unit in Nike history and React foam technology.",
-  images: ["/3.png", "/1.png", "/2.png", "/4.png"],
-  colors: ["Black", "White", "Blue", "Red"],
-  sizes: ["7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11"],
-  features: [
-    "Air Max 270 unit for maximum comfort",
-    "React foam midsole for responsive cushioning",
-    "Breathable mesh upper",
-    "Rubber outsole for durability",
-  ],
-  specifications: {
-    Brand: "Nike",
-    Model: "Air Max 270 React",
-    Category: "Running Shoes",
-    Material: "Mesh, Synthetic",
-    Sole: "Rubber",
-    Weight: "320g",
-  },
+// const product = {
+//   id: 1,
+//   title: "Nike Air Max 270 React",
+//   price: "$210",
+//   originalPrice: "$280",
+//   rating: 4.9,
+//   reviews: "2.5k+",
+//   description:
+//     "The Nike Air Max 270 React combines two of Nike's most innovative technologies for unparalleled comfort and style. Featuring the largest heel Air unit in Nike history and React foam technology.",
+//   images: ["/3.png", "/1.png", "/2.png", "/4.png"],
+//   colors: ["Black", "White", "Blue", "Red"],
+//   sizes: ["7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11"],
+//   features: [
+//     "Air Max 270 unit for maximum comfort",
+//     "React foam midsole for responsive cushioning",
+//     "Breathable mesh upper",
+//     "Rubber outsole for durability",
+//   ],
+//   specifications: {
+//     Brand: "Nike",
+//     Model: "Air Max 270 React",
+//     Category: "Running Shoes",
+//     Material: "Mesh, Synthetic",
+//     Sole: "Rubber",
+//     Weight: "320g",
+//   },
+// }
+interface Product {
+  id: number
+  name: string
+  slug: string
+  price: number
+  special_price?: number
+  description?: string
+  brand?: { name: string }
+  categories?: { name: string }[]
 }
 
+interface ProductDetailProps {
+  product: Product
+  mainImage: string
+  gallery: string[]
+}
 const relatedProducts = [
   {
     title: "Nike Air Force 1",
@@ -104,7 +119,7 @@ const reviews = [
   },
 ]
 
-export default function ProductDetailPage() {
+export default function ProductDetailPage({ product, mainImage, gallery }: ProductDetailProps) {
   const [selectedImage, setSelectedImage] = useState(0)
   const [selectedColor, setSelectedColor] = useState("Black")
   const [selectedSize, setSelectedSize] = useState("")
@@ -152,55 +167,47 @@ export default function ProductDetailPage() {
               <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-3xl p-8 h-96 flex items-center justify-center overflow-hidden shadow-2xl">
                 <motion.img
                   key={selectedImage}
-                  src={product.images[selectedImage]}
-                  alt={product.title}
+                  src={gallery[selectedImage] || mainImage}
+                  alt={product.name}
                   className="w-full h-full object-contain drop-shadow-2xl"
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.5 }}
                   whileHover={{ scale: 1.1 }}
                 />
-
-                {/* Navigation Arrows */}
                 <button
                   className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20 hover:bg-gradient-to-r hover:from-yellow-400 hover:to-orange-400 hover:text-black transition-all duration-300"
-                  onClick={() => setSelectedImage(selectedImage > 0 ? selectedImage - 1 : product.images.length - 1)}
+                  onClick={() => setSelectedImage(selectedImage > 0 ? selectedImage - 1 : gallery.length - 1)}
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
                 <button
                   className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20 hover:bg-gradient-to-r hover:from-yellow-400 hover:to-orange-400 hover:text-black transition-all duration-300"
-                  onClick={() => setSelectedImage(selectedImage < product.images.length - 1 ? selectedImage + 1 : 0)}
+                  onClick={() => setSelectedImage(selectedImage < gallery.length - 1 ? selectedImage + 1 : 0)}
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
-
-                {/* Floating elements */}
                 <motion.div
                   className="absolute top-6 right-6 w-16 h-16 bg-gradient-to-r from-yellow-400/20 to-orange-400/20 rounded-full backdrop-blur-sm border border-yellow-400/30"
                   animate={{ y: [-10, 10, -10] }}
-                  transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                 />
               </div>
 
-              {/* Thumbnail Images */}
+              {/* Thumbnails */}
               <div className="flex gap-4">
-                {product.images.map((image, index) => (
+                {gallery.map((image, index) => (
                   <motion.button
                     key={index}
                     className={`w-24 h-24 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-3 border-2 transition-all duration-300 ${selectedImage === index
-                        ? "border-yellow-400 shadow-lg shadow-yellow-400/25"
-                        : "border-white/20 hover:border-white/40"
+                      ? "border-yellow-400 shadow-lg shadow-yellow-400/25"
+                      : "border-white/20 hover:border-white/40"
                       }`}
                     onClick={() => setSelectedImage(index)}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <img
-                      src={image || "/placeholder.svg"}
-                      alt={`Product ${index + 1}`}
-                      className="w-full h-full object-contain"
-                    />
+                    <img src={image || "/placeholder.svg"} alt={`Product ${index + 1}`} className="w-full h-full object-contain" />
                   </motion.button>
                 ))}
               </div>
@@ -213,7 +220,6 @@ export default function ProductDetailPage() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              {/* Badge */}
               <motion.div
                 className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400/20 to-transparent backdrop-blur-sm border border-yellow-400/30 rounded-full px-4 py-2"
                 initial={{ opacity: 0, y: 20 }}
@@ -224,79 +230,30 @@ export default function ProductDetailPage() {
                 <span className="text-sm text-yellow-400 font-medium">Premium Collection</span>
               </motion.div>
 
-              {/* Title and Rating */}
               <div>
                 <h1 className="text-5xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent mb-4">
-                  {product.title}
+                  {product.name}
                 </h1>
-                <div className="flex items-center gap-6 mb-6">
-                  <div className="flex items-center gap-2">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                    ))}
-                    <span className="text-yellow-400 font-semibold text-lg ml-2">{product.rating}</span>
-                  </div>
-                  <span className="text-gray-400">({product.reviews} reviews)</span>
-                </div>
               </div>
 
-              {/* Price */}
               <div className="flex items-center gap-4 p-6 bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-2xl">
                 <span className="text-4xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
-                  {product.price}
+                  {product.special_price ?? product.price}
                 </span>
-                <span className="text-xl text-gray-400 line-through">{product.originalPrice}</span>
-                <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1">25% OFF</Badge>
+                {product.special_price && (
+                  <>
+                    <span className="text-xl text-gray-400 line-through">{product.price}</span>
+                    <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1">SALE</Badge>
+                  </>
+                )}
               </div>
 
-              {/* Description */}
               <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-2xl p-6">
-                <p className="text-gray-300 leading-relaxed text-lg">{product.description}</p>
+                <p className="text-gray-300 leading-relaxed text-lg">
+                  {product.description || "No description available."}
+                </p>
               </div>
 
-              {/* Color Selection */}
-              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-2xl p-6">
-                <h3 className="text-xl font-semibold text-white mb-4">Color</h3>
-                <div className="flex gap-3">
-                  {product.colors.map((color) => (
-                    <motion.button
-                      key={color}
-                      className={`px-6 py-3 rounded-xl border-2 transition-all duration-300 font-medium ${selectedColor === color
-                          ? "border-yellow-400 bg-gradient-to-r from-yellow-400 to-orange-400 text-black shadow-lg"
-                          : "border-white/20 text-white hover:border-white/40 bg-white/5"
-                        }`}
-                      onClick={() => setSelectedColor(color)}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      {color}
-                    </motion.button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Size Selection */}
-              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-2xl p-6">
-                <h3 className="text-xl font-semibold text-white mb-4">Size</h3>
-                <div className="grid grid-cols-5 gap-3">
-                  {product.sizes.map((size) => (
-                    <motion.button
-                      key={size}
-                      className={`py-3 rounded-xl border-2 transition-all duration-300 font-medium ${selectedSize === size
-                          ? "border-yellow-400 bg-gradient-to-r from-yellow-400 to-orange-400 text-black shadow-lg"
-                          : "border-white/20 text-white hover:border-white/40 bg-white/5"
-                        }`}
-                      onClick={() => setSelectedSize(size)}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      {size}
-                    </motion.button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Quantity */}
               <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-2xl p-6">
                 <h3 className="text-xl font-semibold text-white mb-4">Quantity</h3>
                 <div className="flex items-center gap-4">
@@ -320,7 +277,6 @@ export default function ProductDetailPage() {
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div className="flex gap-4">
                 <Button className="flex-1 bg-gradient-to-r from-yellow-400 to-orange-400 text-black hover:from-yellow-300 hover:to-orange-300 h-14 text-lg font-semibold rounded-xl shadow-lg hover:shadow-yellow-400/25 transition-all duration-300">
                   <ShoppingCart className="w-5 h-5 mr-2" />
@@ -342,29 +298,10 @@ export default function ProductDetailPage() {
                 </Button>
               </div>
 
-              {/* Features */}
               <div className="grid grid-cols-3 gap-4">
-                <motion.div
-                  className="flex flex-col items-center gap-2 p-4 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-xl text-center"
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <Truck className="w-6 h-6 text-yellow-400" />
-                  <span className="text-sm text-gray-300 font-medium">Free Shipping</span>
-                </motion.div>
-                <motion.div
-                  className="flex flex-col items-center gap-2 p-4 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-xl text-center"
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <Shield className="w-6 h-6 text-yellow-400" />
-                  <span className="text-sm text-gray-300 font-medium">2 Year Warranty</span>
-                </motion.div>
-                <motion.div
-                  className="flex flex-col items-center gap-2 p-4 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-xl text-center"
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <RotateCcw className="w-6 h-6 text-yellow-400" />
-                  <span className="text-sm text-gray-300 font-medium">30 Day Returns</span>
-                </motion.div>
+                <Feature icon={<Truck className="w-6 h-6 text-yellow-400" />} label="Free Shipping" />
+                <Feature icon={<Shield className="w-6 h-6 text-yellow-400" />} label="2 Year Warranty" />
+                <Feature icon={<RotateCcw className="w-6 h-6 text-yellow-400" />} label="30 Day Returns" />
               </div>
             </motion.div>
           </section>
@@ -421,7 +358,7 @@ export default function ProductDetailPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
                       <p className="text-gray-300 mb-8 leading-relaxed text-lg">{product.description}</p>
-                      <div className="space-y-4">
+                      {/* <div className="space-y-4">
                         {product.features.map((feature, index) => (
                           <motion.div
                             key={index}
@@ -432,7 +369,7 @@ export default function ProductDetailPage() {
                             <span className="text-gray-300 leading-relaxed">{feature}</span>
                           </motion.div>
                         ))}
-                      </div>
+                      </div> */}
                     </div>
                     <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl p-8 flex items-center justify-center">
                       <motion.img
@@ -457,7 +394,7 @@ export default function ProductDetailPage() {
                   <h3 className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent mb-8">
                     Technical Specifications
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {Object.entries(product.specifications).map(([key, value]) => (
                       <motion.div
                         key={key}
@@ -468,7 +405,7 @@ export default function ProductDetailPage() {
                         <span className="text-white font-semibold">{value}</span>
                       </motion.div>
                     ))}
-                  </div>
+                  </div> */}
                 </motion.div>
               </TabsContent>
 
@@ -571,5 +508,16 @@ export default function ProductDetailPage() {
         <Footer />
       </div>
     </>
+  )
+}
+function Feature({ icon, label }: { icon: JSX.Element; label: string }) {
+  return (
+    <motion.div
+      className="flex flex-col items-center gap-2 p-4 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-xl text-center"
+      whileHover={{ scale: 1.02 }}
+    >
+      {icon}
+      <span className="text-sm text-gray-300 font-medium">{label}</span>
+    </motion.div>
   )
 }

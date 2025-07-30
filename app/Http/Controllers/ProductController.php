@@ -335,12 +335,11 @@ class ProductController extends Controller
     // product detail
     public function productDetail(Product $product)
     {
-        $product->load(['brand', 'categories']);
-        $product->main_image_url = $product->getFirstMediaUrl('main_image') ?: '/images/default-product.png';
-        $product->gallery_urls = $product->getMedia('gallery')->map->getUrl();
-
+        $product->load(['media', 'brand', 'categories']); // optional relations
         return Inertia::render('ProductDetails/Index', [
             'product' => $product,
+            'mainImage' => $product->getFirstMediaUrl('main_image') ?: '/images/default-product.png',
+            'gallery' => $product->getMedia('gallery')->map(fn($m) => $m->getUrl()),
         ]);
     }
 }

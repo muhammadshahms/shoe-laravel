@@ -15,7 +15,7 @@ Route::get('/product-details', function () {
 Route::get('shop', [ProductController::class, 'shop'])->name('shop');
 
 //productdetails
-Route::get('product-details/{slug}', [ProductController::class, 'Show'])->name('product-details.show');
+Route::get('product-details/{product:slug}', [ProductController::class, 'productDetail'])->name('product-details.show');
 
 
 // Route::middleware(['auth', 'verified'])->group(function () {
