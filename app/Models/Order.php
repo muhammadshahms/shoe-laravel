@@ -76,11 +76,11 @@ class Order extends Model
     }
 
     /**
-     * Relationship: Order has many items
+     * Relationship: Order has many cart items
      */
-    public function items(): HasMany
+    public function cartItems(): HasMany
     {
-        return $this->hasMany(OrderItem::class);
+        return $this->hasMany(CartItem::class);
     }
 
     /**

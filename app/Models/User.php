@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Models\Role;
+use App\Models\CartItem;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
@@ -59,4 +60,9 @@ class User extends Authenticatable
     {
         return $this->hasRole('admin');
     }
+    public function cartItems()
+    {
+        return $this->hasMany(CartItem::class);
+    }
+
 }
