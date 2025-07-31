@@ -268,8 +268,8 @@ export default function ShopPage() {
                                   key={category}
                                   variant={currentFilters.category === category ? "default" : "ghost"}
                                   className={`w-full justify-start ${currentFilters.category === category
-                                      ? "bg-gradient-to-r from-yellow-400 to-orange-400 text-black hover:from-yellow-300 hover:to-orange-300"
-                                      : "text-white hover:bg-white/10  hover:text-yellow-400"
+                                    ? "bg-gradient-to-r from-yellow-400 to-orange-400 text-black hover:from-yellow-300 hover:to-orange-300"
+                                    : "text-white hover:bg-white/10  hover:text-yellow-400"
                                     }`}
                                   onClick={() => handleFilterChange("category", category)}
                                 >
@@ -449,8 +449,8 @@ export default function ShopPage() {
                                           key={category}
                                           variant={currentFilters.category === category ? "default" : "ghost"}
                                           className={`w-full justify-start ${currentFilters.category === category
-                                              ? "bg-gradient-to-r from-yellow-400 to-orange-400 text-black"
-                                              : "text-white hover:bg-white/10"
+                                            ? "bg-gradient-to-r from-yellow-400 to-orange-400 text-black"
+                                            : "text-white hover:bg-white/10"
                                             }`}
                                           onClick={() => handleFilterChange("category", category)}
                                         >
@@ -692,7 +692,7 @@ export default function ShopPage() {
         <Footer />
       </div>
       <Toaster richColors position="bottom-right" />
-      <CartSheet isOpen={isCartOpen} onOpenChange={setIsCartOpen} />
+      <CartSheet />
     </>
   )
 }

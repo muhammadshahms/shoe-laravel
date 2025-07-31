@@ -7,23 +7,18 @@ import { Separator } from "@/components/ui/separator"
 import { Minus, Plus, Trash2, ShoppingCart } from "lucide-react"
 import { selectCartTotal, useCartStore } from "@/hooks/cart-store"
 
-interface CartSheetProps {
-  isOpen: boolean
-  onOpenChange: (open: boolean) => void
-}
-
-export function CartSheet({ isOpen, onOpenChange }: CartSheetProps) {
-  // Select only the necessary parts of the store
+export function CartSheet() {
   const cartItems = useCartStore((state) => state.cartItems)
   const removeItem = useCartStore((state) => state.removeItem)
   const updateItemQuantity = useCartStore((state) => state.updateItemQuantity)
   const clearCart = useCartStore((state) => state.clearCart)
-
-  // Use selectors for derived values
   const cartTotal = useCartStore(selectCartTotal)
 
+  const isOpen = useCartStore((state) => state.isOpen)
+  const setOpen = useCartStore((state) => state.setOpen)
+
   return (
-    <Sheet open={isOpen} onOpenChange={onOpenChange}>
+    <Sheet open={isOpen} onOpenChange={setOpen}>
       <SheetContent className="w-full sm:max-w-lg flex flex-col bg-gray-900 text-white border-gray-700 p-8">
         <SheetHeader>
           <SheetTitle className="text-white text-2xl">Your Cart</SheetTitle>
@@ -50,7 +45,7 @@ export function CartSheet({ isOpen, onOpenChange }: CartSheetProps) {
                     />
                     <div className="flex-1 grid gap-1">
                       <h4 className="font-semibold text-lg">{item.title}</h4>
-                      <p className="text-gray-400 text-sm">${item.price.toFixed(2)}</p>
+                      <p className="font-bold text-lg">${(item.price * item.quantity).toFixed(2)}</p>
                       <div className="flex items-center gap-2 mt-2">
                         <Button
                           variant="outline"

@@ -25,7 +25,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useState, useEffect } from "react"
 import AppLogoIcon from "../app-logo-icon"
 import AppLogo from "../app-logo"
-import { useCart } from "@/hooks/use-cart"
+// import { useCart } from "@/hooks/use-cart"
 import { CartSheet } from "../CartSheet"
 
 const Header = () => {
@@ -37,7 +37,7 @@ const Header = () => {
     const [cartCount] = useState(3)
     const [wishlistCount] = useState(5)
     const [notificationCount] = useState(2)
-    const { addItem, cartItemCount } = useCart() // Use the cart hook
+    // const { addItem, cartItemCount } = useCart() // Use the cart hook
     const [isCartOpen, setIsCartOpen] = useState(false) // State for cart sheet
 
     // Handle scroll effect
@@ -308,11 +308,11 @@ const Header = () => {
                                 onClick={() => setIsCartOpen(true)}
                             >
                                 <ShoppingCart className="w-6 h-6 " />
-                                {cartItemCount > 0 && (
+                                {/* {cartItemCount > 0 && (
                                     <Badge className="absolute -top-1 -right-1 bg-yellow-400 text-black rounded-full px-2 py-0.5 text-xs font-bold">
                                         {cartItemCount}
                                     </Badge>
-                                )}
+                                )} */}
                                 <span className="sr-only">View Cart</span>
                             </Button>
                                 

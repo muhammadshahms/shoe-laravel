@@ -1,5 +1,4 @@
 "use client"
-
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -23,35 +22,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Header from "@/components/Global/Header"
 import ProductCard from "@/components/Global/ProductCard"
 import Footer from "@/components/Global/Footer"
+import { useCartStore } from "@/hooks/cart-store"
+import type { JSX } from "react/jsx-runtime"
 
-// Product data
-// const product = {
-//   id: 1,
-//   title: "Nike Air Max 270 React",
-//   price: "$210",
-//   originalPrice: "$280",
-//   rating: 4.9,
-//   reviews: "2.5k+",
-//   description:
-//     "The Nike Air Max 270 React combines two of Nike's most innovative technologies for unparalleled comfort and style. Featuring the largest heel Air unit in Nike history and React foam technology.",
-//   images: ["/3.png", "/1.png", "/2.png", "/4.png"],
-//   colors: ["Black", "White", "Blue", "Red"],
-//   sizes: ["7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11"],
-//   features: [
-//     "Air Max 270 unit for maximum comfort",
-//     "React foam midsole for responsive cushioning",
-//     "Breathable mesh upper",
-//     "Rubber outsole for durability",
-//   ],
-//   specifications: {
-//     Brand: "Nike",
-//     Model: "Air Max 270 React",
-//     Category: "Running Shoes",
-//     Material: "Mesh, Synthetic",
-//     Sole: "Rubber",
-//     Weight: "320g",
-//   },
-// }
 interface Product {
   id: number
   name: string
@@ -60,7 +33,7 @@ interface Product {
   special_price?: number
   description?: string
   brand?: { name: string }
-  categories?: { name: string }[]
+  categories?: { name: string }
 }
 
 interface ProductDetailProps {
@@ -68,6 +41,8 @@ interface ProductDetailProps {
   mainImage: string
   gallery: string[]
 }
+
+// Static data for related products and reviews (not from controller)
 const relatedProducts = [
   {
     title: "Nike Air Force 1",
@@ -75,7 +50,7 @@ const relatedProducts = [
     originalPrice: "$240",
     rating: 4.8,
     reviews: "1.8k+",
-    image: "/1.png",
+    image: "/placeholder.svg?height=200&width=200",
   },
   {
     title: "Nike React Infinity",
@@ -83,7 +58,7 @@ const relatedProducts = [
     originalPrice: "$200",
     rating: 4.7,
     reviews: "950+",
-    image: "/2.png",
+    image: "/placeholder.svg?height=200&width=200",
   },
   {
     title: "Nike Zoom Pegasus",
@@ -91,7 +66,7 @@ const relatedProducts = [
     originalPrice: "$150",
     rating: 4.6,
     reviews: "1.2k+",
-    image: "/4.png",
+    image: "/placeholder.svg?height=200&width=200",
   },
 ]
 
@@ -101,31 +76,50 @@ const reviews = [
     rating: 5,
     date: "2 days ago",
     comment: "Amazing comfort and style! Perfect for daily wear and running.",
-    avatar: "/placeholder-user.jpg",
+    avatar: "/placeholder.svg?height=100&width=100",
   },
   {
     name: "Sarah Wilson",
     rating: 5,
     date: "1 week ago",
     comment: "Love the design and the Air Max cushioning is incredible.",
-    avatar: "/placeholder-user.jpg",
+    avatar: "/placeholder.svg?height=100&width=100",
   },
   {
     name: "Mike Chen",
     rating: 4,
     date: "2 weeks ago",
     comment: "Great shoes, very comfortable. Sizing runs a bit large.",
-    avatar: "/placeholder-user.jpg",
+    avatar: "/placeholder.svg?height=100&width=100",
   },
 ]
 
 export default function ProductDetailPage({ product, mainImage, gallery }: ProductDetailProps) {
   const [selectedImage, setSelectedImage] = useState(0)
-  const [selectedColor, setSelectedColor] = useState("Black")
-  const [selectedSize, setSelectedSize] = useState("")
   const [quantity, setQuantity] = useState(1)
   const [isWishlisted, setIsWishlisted] = useState(false)
+  const cartItems = useCartStore((state) => state.cartItems)
+  const addItem = useCartStore((state) => state.addItem)
+  const updateItemQuantity = useCartStore((state) => state.updateItemQuantity)
+  const setOpen = useCartStore((state) => state.setOpen)
+  const currentProductInCart = cartItems.find((item) => item.id === product.id)
+  const handleAddToCart = () => {
+    const numericPrice = Number.parseFloat(product.price.toString())
+    if (isNaN(numericPrice)) {
+      console.error("Invalid price for product:", product.name, product.price)
+      return
+    }
 
+    addItem(
+      {
+        id: product.id,
+        name: product.name,
+        price: numericPrice,
+        main_image_url: mainImage,
+      },
+      quantity
+    )
+  }
   return (
     <>
       <div className="text-white min-h-screen font-sans bg-gradient-to-b from-gray-900 via-black to-gray-900 relative overflow-hidden">
@@ -136,7 +130,6 @@ export default function ProductDetailPage({ product, mainImage, gallery }: Produ
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-400/10 rounded-full blur-3xl"></div>
           <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-pink-500/10 rounded-full blur-3xl"></div>
         </div>
-
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Breadcrumb */}
           <motion.div
@@ -150,10 +143,9 @@ export default function ProductDetailPage({ product, mainImage, gallery }: Produ
               <ChevronRight className="w-4 h-4 text-gray-500" />
               <span className="text-gray-400">Shoes</span>
               <ChevronRight className="w-4 h-4 text-gray-500" />
-              <span className="text-yellow-400 font-medium">Nike Air Max 270 React</span>
+              <span className="text-yellow-400 font-medium">{product.name}</span>
             </div>
           </motion.div>
-
           {/* Product Detail Section */}
           <section className="grid grid-cols-1 lg:grid-cols-2 gap-16 py-8">
             {/* Product Images */}
@@ -190,10 +182,9 @@ export default function ProductDetailPage({ product, mainImage, gallery }: Produ
                 <motion.div
                   className="absolute top-6 right-6 w-16 h-16 bg-gradient-to-r from-yellow-400/20 to-orange-400/20 rounded-full backdrop-blur-sm border border-yellow-400/30"
                   animate={{ y: [-10, 10, -10] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
                 />
               </div>
-
               {/* Thumbnails */}
               <div className="flex gap-4">
                 {gallery.map((image, index) => (
@@ -207,12 +198,15 @@ export default function ProductDetailPage({ product, mainImage, gallery }: Produ
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <img src={image || "/placeholder.svg"} alt={`Product ${index + 1}`} className="w-full h-full object-contain" />
+                    <img
+                      src={image || "/placeholder.svg"}
+                      alt={`Product ${index + 1}`}
+                      className="w-full h-full object-contain"
+                    />
                   </motion.button>
                 ))}
               </div>
             </motion.div>
-
             {/* Product Info */}
             <motion.div
               className="space-y-8"
@@ -229,46 +223,58 @@ export default function ProductDetailPage({ product, mainImage, gallery }: Produ
                 <Sparkles className="w-4 h-4 text-yellow-400" />
                 <span className="text-sm text-yellow-400 font-medium">Premium Collection</span>
               </motion.div>
-
               <div>
                 <h1 className="text-5xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent mb-4">
                   {product.name}
                 </h1>
               </div>
-
               <div className="flex items-center gap-4 p-6 bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-2xl">
                 <span className="text-4xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
-                  {product.special_price ?? product.price}
+                  ${product.special_price ?? product.price}
                 </span>
                 {product.special_price && (
                   <>
-                    <span className="text-xl text-gray-400 line-through">{product.price}</span>
+                    <span className="text-xl text-gray-400 line-through">${product.price}</span>
                     <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1">SALE</Badge>
                   </>
                 )}
               </div>
-
               <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-2xl p-6">
                 <p className="text-gray-300 leading-relaxed text-lg">
                   {product.description || "No description available."}
                 </p>
               </div>
-
               <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-2xl p-6">
                 <h3 className="text-xl font-semibold text-white mb-4">Quantity</h3>
                 <div className="flex items-center gap-4">
                   <motion.button
                     className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20 hover:bg-white/20 transition-all duration-300"
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    onClick={() => {
+                      if (currentProductInCart) {
+                        updateItemQuantity(currentProductInCart.id, Math.max(1, currentProductInCart.quantity - 1))
+                      } else {
+                        setQuantity(Math.max(1, quantity - 1))
+                      }
+                    }}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
                     <Minus className="w-5 h-5" />
                   </motion.button>
-                  <span className="text-2xl font-semibold w-16 text-center">{quantity}</span>
+
+                  <span className="text-2xl font-semibold w-16 text-center">
+                    {currentProductInCart ? currentProductInCart.quantity : quantity}
+                  </span>
+
                   <motion.button
                     className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20 hover:bg-white/20 transition-all duration-300"
-                    onClick={() => setQuantity(quantity + 1)}
+                    onClick={() => {
+                      if (currentProductInCart) {
+                        updateItemQuantity(currentProductInCart.id, currentProductInCart.quantity + 1)
+                      } else {
+                        setQuantity(quantity + 1)
+                      }
+                    }}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
@@ -278,7 +284,20 @@ export default function ProductDetailPage({ product, mainImage, gallery }: Produ
               </div>
 
               <div className="flex gap-4">
-                <Button className="flex-1 bg-gradient-to-r from-yellow-400 to-orange-400 text-black hover:from-yellow-300 hover:to-orange-300 h-14 text-lg font-semibold rounded-xl shadow-lg hover:shadow-yellow-400/25 transition-all duration-300">
+                <Button
+                  className="flex-1 bg-gradient-to-r from-yellow-400 to-orange-400 text-black hover:from-yellow-300 hover:to-orange-300 h-14 text-lg font-semibold rounded-xl shadow-lg hover:shadow-yellow-400/25 transition-all duration-300"
+                  onClick={() =>
+                    addItem(
+                      {
+                        id: product.id,
+                        name: product.name,
+                        price: product.price,
+                        main_image_url: mainImage,
+                      },
+                      quantity,
+                    )
+                  }
+                >
                   <ShoppingCart className="w-5 h-5 mr-2" />
                   Add to Cart
                 </Button>
@@ -297,7 +316,6 @@ export default function ProductDetailPage({ product, mainImage, gallery }: Produ
                   <Share2 className="w-5 h-5" />
                 </Button>
               </div>
-
               <div className="grid grid-cols-3 gap-4">
                 <Feature icon={<Truck className="w-6 h-6 text-yellow-400" />} label="Free Shipping" />
                 <Feature icon={<Shield className="w-6 h-6 text-yellow-400" />} label="2 Year Warranty" />
@@ -305,7 +323,6 @@ export default function ProductDetailPage({ product, mainImage, gallery }: Produ
               </div>
             </motion.div>
           </section>
-
           {/* Product Details Tabs */}
           <section className="py-20">
             <motion.div
@@ -322,7 +339,6 @@ export default function ProductDetailPage({ product, mainImage, gallery }: Produ
                 Everything you need to know about this premium product
               </p>
             </motion.div>
-
             <Tabs defaultValue="description" className="w-full">
               <TabsList className="flex justify-center flex-wrap gap-4 mb-8 bg-transparent border-none">
                 <TabsTrigger
@@ -344,7 +360,6 @@ export default function ProductDetailPage({ product, mainImage, gallery }: Produ
                   Reviews
                 </TabsTrigger>
               </TabsList>
-
               <TabsContent value="description">
                 <motion.div
                   className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl"
@@ -358,22 +373,10 @@ export default function ProductDetailPage({ product, mainImage, gallery }: Produ
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
                       <p className="text-gray-300 mb-8 leading-relaxed text-lg">{product.description}</p>
-                      {/* <div className="space-y-4">
-                        {product.features.map((feature, index) => (
-                          <motion.div
-                            key={index}
-                            className="flex items-start gap-4 p-4 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all duration-300"
-                            whileHover={{ scale: 1.02 }}
-                          >
-                            <div className="w-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full mt-2 flex-shrink-0"></div>
-                            <span className="text-gray-300 leading-relaxed">{feature}</span>
-                          </motion.div>
-                        ))}
-                      </div> */}
                     </div>
                     <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl p-8 flex items-center justify-center">
                       <motion.img
-                        src="/3.png"
+                        src="/placeholder.svg?height=256&width=256"
                         alt="Product Feature"
                         className="w-full h-64 object-contain drop-shadow-2xl"
                         whileHover={{ scale: 1.05, rotate: 2 }}
@@ -383,7 +386,6 @@ export default function ProductDetailPage({ product, mainImage, gallery }: Produ
                   </div>
                 </motion.div>
               </TabsContent>
-
               <TabsContent value="specifications">
                 <motion.div
                   className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl"
@@ -394,21 +396,29 @@ export default function ProductDetailPage({ product, mainImage, gallery }: Produ
                   <h3 className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent mb-8">
                     Technical Specifications
                   </h3>
-                  {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {Object.entries(product.specifications).map(([key, value]) => (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {product.brand && (
                       <motion.div
-                        key={key}
                         className="flex justify-between items-center py-4 px-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl hover:bg-white/10 transition-all duration-300"
                         whileHover={{ scale: 1.02 }}
                       >
-                        <span className="text-gray-400 font-medium">{key}</span>
-                        <span className="text-white font-semibold">{value}</span>
+                        <span className="text-gray-400 font-medium">Brand</span>
+                        <span className="text-white font-semibold">{product.brand.name}</span>
                       </motion.div>
-                    ))}
-                  </div> */}
+                    )}
+                    {product.categories && (
+                      <motion.div
+                        className="flex justify-between items-center py-4 px-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl hover:bg-white/10 transition-all duration-300"
+                        whileHover={{ scale: 1.02 }}
+                      >
+                        <span className="text-gray-400 font-medium">Category</span>
+                        <span className="text-white font-semibold">{product.categories.name}</span>
+                      </motion.div>
+                    )}
+                    {/* Add more specifications here if available in product object */}
+                  </div>
                 </motion.div>
               </TabsContent>
-
               <TabsContent value="reviews">
                 <motion.div
                   className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl"
@@ -424,7 +434,6 @@ export default function ProductDetailPage({ product, mainImage, gallery }: Produ
                       Write Review
                     </Button>
                   </div>
-
                   <div className="space-y-6">
                     {reviews.map((review, index) => (
                       <motion.div
@@ -463,7 +472,6 @@ export default function ProductDetailPage({ product, mainImage, gallery }: Produ
               </TabsContent>
             </Tabs>
           </section>
-
           {/* Related Products */}
           <section className="">
             <motion.div
@@ -480,7 +488,6 @@ export default function ProductDetailPage({ product, mainImage, gallery }: Produ
                 Discover more amazing products from our premium collection
               </p>
             </motion.div>
-
             <motion.div
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
               initial={{ opacity: 0, y: 30 }}
@@ -510,6 +517,7 @@ export default function ProductDetailPage({ product, mainImage, gallery }: Produ
     </>
   )
 }
+
 function Feature({ icon, label }: { icon: JSX.Element; label: string }) {
   return (
     <motion.div

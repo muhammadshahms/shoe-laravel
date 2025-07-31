@@ -52,7 +52,7 @@ export default function ProductCard({
       name: title,
       price: numericPrice,
       main_image_url: image,
-    })
+    }, 1)
   }
 
   return (

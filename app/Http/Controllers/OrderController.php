@@ -75,37 +75,57 @@ class OrderController extends Controller
         try {
             $user = Auth::user();
             /** @var \App\Models\User $user */
-            
+
             $cartItems = $user->cartItems()->with('product')->get();
+
             if ($cartItems->isEmpty()) {
                 return back()->withErrors(['error' => 'Your cart is empty.']);
             }
-            // Check the product quantities
+
+            $total = 0;
+            $lockedProducts = [];
+
+            // Lock and validate products
             foreach ($cartItems as $item) {
-                if ($item->product->quantity < $item->qty) {
-                    throw new \Exception("Product {$item->product->name} is out of stock.");
+                $product = Product::lockForUpdate()->find($item->product_id);
+
+                if (!$product) {
+                    throw new \Exception("Product not found (ID: {$item->product_id}).");
                 }
+
+                if ($product->quantity < $item->qty) {
+                    throw new \Exception("Product {$product->name} is out of stock.");
+                }
+
+                $lockedProducts[$item->product_id] = $product;
+
+                $total += $product->price * $item->qty;
             }
 
-            // Create order
+            // Create the order
             $order = Order::create([
                 'user_id' => $user->id,
-                'status' => 'pending',
-                'total' => $cartItems->sum(fn($item) => $item->product->price * $item->qty),
+                'status' => Order::STATUS_PENDING,
+                'total' => $total,
             ]);
 
-            // Attach products to order with pivot data
-            foreach ($cartItems as $item) {
-                $order->products()->attach($item->product_id, [
-                    'quantity' => $item->qty,
-                    'price' => $item->product->price,
-                ]);
-
-                // Decrease product stock
-                $item->product->decrement('quantity', $item->qty);
+            if (!$order) {
+                throw new \Exception("Failed to create order.");
             }
 
-            // Empty the user's cart
+            // Attach products and update stock
+            foreach ($cartItems as $item) {
+                $product = $lockedProducts[$item->product_id];
+
+                $order->products()->attach($product->id, [
+                    'quantity' => $item->qty,
+                    'price' => $product->price,
+                ]);
+
+                $product->decrement('quantity', $item->qty);
+            }
+
+            // Clear cart
             $user->cartItems()->delete();
 
             DB::commit();
@@ -118,4 +138,5 @@ class OrderController extends Controller
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
+
 }
