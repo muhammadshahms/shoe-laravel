@@ -2,25 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ProductVariation;
 use App\Models\Product;
+use App\Models\ProductVariation;
 use Illuminate\Http\Request;
 
 class ProductVariationController extends Controller
 {
     public function index()
     {
-        $variations = ProductVariation::with('product')->latest()->paginate(10);
+        $variations = ProductVariation::with('product', 'attributeOptions.attribute')->latest()->paginate(10);
+        $variations->load('attributeOptions.attribute');
+        // Load attribute options for each variation
+        foreach ($variations as $variation) {
+            $variation->attributeOptions->load('attribute');
+        }
+
         return inertia('ProductVariation/Index', [
-            'variations' => $variations
+            'variations' => $variations,
         ]);
     }
 
     public function create()
     {
         $products = Product::all();
+        $attributes = \App\Models\Attribute::with('options')->get();
+
         return inertia('ProductVariation/Create', [
-            'products' => $products
+            'products' => $products,
+            'attributes' => $attributes,
         ]);
     }
 
@@ -33,20 +42,37 @@ class ProductVariationController extends Controller
             'price' => 'required|numeric',
             'quantity' => 'required|integer',
             'in_stock' => 'boolean',
-            'attributes' => 'nullable|array',
+            'attribute_option_ids' => 'nullable|array',
+            'attribute_option_ids.*' => 'exists:attribute_options,id',
         ]);
 
-        ProductVariation::create($validated);
+        $variation = ProductVariation::create([
+            'product_id' => $validated['product_id'],
+            'sku' => $validated['sku'],
+            'barcode' => $validated['barcode'] ?? null,
+            'price' => $validated['price'],
+            'quantity' => $validated['quantity'],
+            'in_stock' => $validated['in_stock'] ?? false,
+        ]);
 
-        return redirect()->route('product-variations.index')->with('success', 'Variation created successfully.');
+        if (!empty($validated['attribute_option_ids'])) {
+            $variation->attributeOptions()->sync($validated['attribute_option_ids']);
+        }
+
+        return redirect()->route('product-variations.index')->with('success', 'Product variation created successfully.');
     }
 
     public function edit(ProductVariation $productVariation)
     {
         $products = Product::all();
+        $attributes = \App\Models\Attribute::with('options')->get();
+        $productVariation->load('attributeOptions');
+
         return inertia('ProductVariation/Edit', [
             'variation' => $productVariation,
-            'products' => $products
+            'products' => $products,
+            'attributes' => $attributes,
+            'selectedOptionIds' => $productVariation->attributeOptions->pluck('id'),
         ]);
     }
 
@@ -59,25 +85,39 @@ class ProductVariationController extends Controller
             'price' => 'required|numeric',
             'quantity' => 'required|integer',
             'in_stock' => 'boolean',
-            'attributes' => 'nullable|array',
+            'attribute_option_ids' => 'nullable|array',
+            'attribute_option_ids.*' => 'exists:attribute_options,id',
         ]);
 
-        $productVariation->update($validated);
+        $productVariation->update([
+            'product_id' => $validated['product_id'],
+            'sku' => $validated['sku'],
+            'barcode' => $validated['barcode'] ?? null,
+            'price' => $validated['price'],
+            'quantity' => $validated['quantity'],
+            'in_stock' => $validated['in_stock'] ?? false,
+        ]);
 
-        return redirect()->route('product-variations.index')->with('success', 'Variation updated successfully.');
+        // Sync attribute options
+        $productVariation->attributeOptions()->sync($validated['attribute_option_ids'] ?? []);
+
+        return redirect()->route('product-variations.index')->with('success', 'Product variation updated successfully.');
     }
+
     public function show(ProductVariation $productVariation)
     {
-        $productVariation->load('product');
+        $productVariation->load('product', 'attributeOptions.attribute');
 
         return inertia('ProductVariation/Show', [
-            'variation' => $productVariation
+            'variation' => $productVariation,
         ]);
     }
-    
+
     public function destroy(ProductVariation $productVariation)
     {
+        $productVariation->attributeOptions()->detach();
         $productVariation->delete();
-        return redirect()->route('product-variations.index')->with('success', 'Variation deleted successfully.');
+
+        return redirect()->route('product-variations.index')->with('success', 'Product variation deleted successfully.');
     }
 }

@@ -21,6 +21,16 @@ class ProductVariation extends Model
         'in_stock' => 'boolean',
     ];
 
+    // ProductVariation.php
+    public function attributeOptionPivots()
+    {
+        return $this->hasMany(AttributeOptionProductVariation::class);
+    }
+
+    public function attributeOptions()
+    {
+        return $this->belongsToMany(AttributeOption::class, 'attribute_option_product_variation');
+    }
     public function product()
     {
         return $this->belongsTo(Product::class);

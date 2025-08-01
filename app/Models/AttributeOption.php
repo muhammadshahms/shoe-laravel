@@ -16,4 +16,10 @@ class AttributeOption extends Model
     {
         return $this->belongsTo(Attribute::class);
     }
+    // AttributeOption.php
+    public function productVariations()
+    {
+        return $this->belongsToMany(ProductVariation::class, 'attribute_option_product_variation');
+    }
+
 }

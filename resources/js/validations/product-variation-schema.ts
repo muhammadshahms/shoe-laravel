@@ -1,5 +1,6 @@
 import { z } from "zod"
 
+
 export const productVariationSchema = z.object({
   product_id: z.number().min(1, "Product is required"),
   sku: z.string().min(1, "SKU is required"),
@@ -7,8 +8,11 @@ export const productVariationSchema = z.object({
   price: z.number().min(0, "Price must be positive"),
   quantity: z.number().int().min(0, "Quantity must be non-negative"),
   in_stock: z.boolean().default(true),
-  attributes: z.record(z.string()).optional(),
+
+  // ✅ Replaced attributes with attribute_option_ids
+  attribute_option_ids: z.array(z.number()).optional(),
 })
+
 
 export type ProductVariationFormData = z.infer<typeof productVariationSchema>
 
@@ -20,14 +24,17 @@ export interface ProductVariation {
   price: number
   quantity: number
   in_stock: boolean
-  attributes?: Record<string, string>
-  created_at: string
-  updated_at: string
+  attribute_option_ids?: number[];
+
   product: {
     id: number
     name: string
   }
+
+  created_at: string
+  updated_at: string
 }
+
 
 export interface Product {
   id: number

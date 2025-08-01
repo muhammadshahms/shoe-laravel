@@ -1,217 +1,108 @@
 "use client"
 
-import { ArrowLeft, Edit, Trash2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { useState } from "react"
-import { ProductVariation } from "@/validations/product-variation-schema"
 import { Link } from "@inertiajs/react"
+import { ChevronLeft } from "lucide-react"
+import type { ProductVariationShowProps } from "./types"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import AppLayout from "@/layouts/app-layout"
 
-interface ProductVariationShowProps {
-  variation: ProductVariation
-}
-
 export default function ProductVariationShow({ variation }: ProductVariationShowProps) {
-  const [isDeleting, setIsDeleting] = useState(false)
-
-  const handleDelete = async () => {
-    setIsDeleting(true)
-    // In Laravel Inertia, you would use Inertia.delete()
-    console.log("Delete variation:", variation.id)
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    })
-  }
-
   return (
     <AppLayout>
-      <div className="p-6">
-        <div className="mb-6 flex items-center justify-between">
-          <Link href="/dashboard/product-variations">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Variations
-            </Button>
-          </Link>
-
-          <div className="flex gap-2">
-            <Link href={`/product-variations/${variation.id}/edit`}>
-              <Button variant="outline" size="sm">
-                <Edit className="mr-2 h-4 w-4" />
-                Edit
+      {" "}
+      {/* Wrap with AppLayout */}
+      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+          <div className="mx-auto grid max-w-[59rem] flex-1 auto-rows-max gap-4">
+            <div className="flex items-center gap-4">
+              <Button variant="outline" size="icon" className="h-7 w-7 bg-transparent" asChild>
+                <Link href={route("product-variations.index")}>
+                  <ChevronLeft className="h-4 w-4" />
+                  <span className="sr-only">Back</span>
+                </Link>
               </Button>
-            </Link>
-
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 bg-transparent">
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
+              <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
+                Product Variation Details
+              </h1>
+              <div className="hidden items-center gap-2 md:ml-auto md:flex">
+                <Button variant="outline" size="sm" asChild>
+                  <Link href={route("product-variations.edit", variation.id)}>Edit Variation</Link>
                 </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete the product variation "{variation.sku}".
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete} disabled={isDeleting} className="bg-red-600 hover:bg-red-700">
-                    {isDeleting ? "Deleting..." : "Delete"}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-        </div>
-
-        <div className="grid gap-6 ">
-          <Card className="py-4">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle className="text-2xl">{variation.sku}</CardTitle>
-                  <CardDescription>Product Variation Details</CardDescription>
-                </div>
-                <Badge variant={variation.in_stock ? "default" : "secondary"} className="text-sm">
-                  {variation.in_stock ? "In Stock" : "Out of Stock"}
-                </Badge>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
-                      Product Information
-                    </h3>
-                    <div className="mt-2 space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-sm font-medium">Product:</span>
-                        <span className="text-sm">{variation.product.name}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm font-medium">SKU:</span>
-                        <span className="text-sm font-mono">{variation.sku}</span>
-                      </div>
-                      {variation.barcode && (
-                        <div className="flex justify-between">
-                          <span className="text-sm font-medium">Barcode:</span>
-                          <span className="text-sm font-mono">{variation.barcode}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div>
-                    <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
-                      Pricing & Inventory
-                    </h3>
-                    <div className="mt-2 space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-sm font-medium">Price:</span>
-                        <span className="text-sm font-semibold">
-                          ${Number(variation.price).toFixed(2)}
-                        </span>
-
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm font-medium">Quantity:</span>
-                        <span className="text-sm">{variation.quantity} units</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm font-medium">Status:</span>
-                        <Badge variant={variation.in_stock ? "default" : "secondary"} className="text-xs">
-                          {variation.in_stock ? "Available" : "Unavailable"}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Attributes</h3>
-                    <div className="mt-2">
-                      {variation.attributes && Object.keys(variation.attributes).length > 0 ? (
-                        <div className="space-y-2">
-                          {Object.entries(variation.attributes).map(([key, value]) => (
-                            <div key={key} className="flex justify-between">
-                              <span className="text-sm font-medium capitalize">{key}:</span>
-                              <span className="text-sm">{value}</span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">No attributes defined</p>
-                      )}
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div>
-                    <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Timestamps</h3>
-                    <div className="mt-2 space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-sm font-medium">Created:</span>
-                        <span className="text-sm">{formatDate(variation.created_at)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm font-medium">Updated:</span>
-                        <span className="text-sm">{formatDate(variation.updated_at)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {variation.attributes && Object.keys(variation.attributes).length > 0 && (
+            </div>
             <Card>
               <CardHeader>
-                <CardTitle>Variation Attributes</CardTitle>
-                <CardDescription>Custom attributes for this product variation</CardDescription>
+                <CardTitle>Variation: {variation.sku}</CardTitle>
+                <CardDescription>Detailed information about this product variation.</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {Object.entries(variation.attributes).map(([key, value]) => (
-                    <Badge key={key} variant="outline" className="text-sm">
-                      <span className="font-medium">{key}:</span>
-                      <span className="ml-1">{value}</span>
+              <CardContent className="grid gap-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Product Name</p>
+                    <p className="text-lg font-semibold">{variation.product.name}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">SKU</p>
+                    <p className="text-lg font-semibold">{variation.sku}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Price</p>
+                    <p className="text-lg font-semibold">${variation.price.toFixed(2)}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Quantity</p>
+                    <p className="text-lg font-semibold">{variation.quantity}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">In Stock</p>
+                    <Badge variant={variation.in_stock ? "default" : "destructive"}>
+                      {variation.in_stock ? "Yes" : "No"}
                     </Badge>
-                  ))}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Barcode</p>
+                    <p className="text-lg font-semibold">{variation.barcode || "N/A"}</p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Attributes</p>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {variation.attribute_options.length > 0 ? (
+                      variation.attribute_options.map((option) => (
+                        <Badge key={option.id} variant="secondary">
+                          {option.attribute?.name}: {option.name}
+                        </Badge>
+                      ))
+                    ) : (
+                      <p className="text-muted-foreground">No attributes selected</p>
+                    )}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Created At</p>
+                    <p className="text-lg font-semibold">{new Date(variation.created_at).toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Last Updated</p>
+                    <p className="text-lg font-semibold">{new Date(variation.updated_at).toLocaleString()}</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          )}
-        </div>
+            <div className="flex items-center justify-center gap-2 md:hidden">
+              <Button variant="outline" size="sm" asChild>
+                <Link href={route("product-variations.edit", variation.id)}>Edit Variation</Link>
+              </Button>
+            </div>
+          </div>
+        </main>
       </div>
     </AppLayout>
   )

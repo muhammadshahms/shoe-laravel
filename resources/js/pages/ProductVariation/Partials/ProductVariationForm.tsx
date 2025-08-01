@@ -1,223 +1,141 @@
 "use client"
-
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Plus, X } from "lucide-react"
-import { useState } from "react"
-import { useFormContext } from "react-hook-form"
-import { Product, ProductVariationFormData } from "@/validations/product-variation-schema"
+import { Checkbox } from "@/components/ui/checkbox"
+import type { ProductVariationFormData, Product, Attribute } from "./../types"
 
 interface ProductVariationFormProps {
+  data: ProductVariationFormData
+  setData: (key: keyof ProductVariationFormData, value: any) => void
   products: Product[]
-  initialAttributes?: Record<string, string>
-  onSubmit: (data: ProductVariationFormData) => void
-  submitLabel?: string
+  attributes: Attribute[]
+  errors: Partial<Record<keyof ProductVariationFormData, string>>
+  handleAttributeOptionChange: (optionId: number, checked: boolean) => void
 }
 
-export function ProductVariationForm({
+export default function ProductVariationForm({
+  data,
+  setData,
   products,
-  initialAttributes = {},
-  onSubmit,
-  submitLabel = "Submit",
+  attributes,
+  errors,
+  handleAttributeOptionChange,
 }: ProductVariationFormProps) {
-  const form = useFormContext<ProductVariationFormData>()
-  const [attributes, setAttributes] = useState<Record<string, string>>(initialAttributes)
-  const [newKey, setNewKey] = useState("")
-  const [newValue, setNewValue] = useState("")
-
-  const addAttribute = () => {
-    if (newKey && newValue) {
-      setAttributes((prev) => ({ ...prev, [newKey]: newValue }))
-      setNewKey("")
-      setNewValue("")
-    }
-  }
-
-  const removeAttribute = (key: string) => {
-    setAttributes((prev) => {
-      const copy = { ...prev }
-      delete copy[key]
-      return copy
-    })
-  }
-
-  const handleSubmit = (data: ProductVariationFormData) => {
-    onSubmit({
-      ...data,
-      attributes: Object.keys(attributes).length > 0 ? attributes : undefined,
-    })
-  }
-
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="product_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Product</FormLabel>
-                <Select
-                  onValueChange={(val) => field.onChange(Number.parseInt(val))}
-                  value={field.value?.toString()}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a product" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {products.map((product) => (
-                      <SelectItem key={product.id} value={product.id.toString()}>
-                        {product.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="sku"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>SKU</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter SKU" {...field} />
-                </FormControl>
-                <FormDescription>Unique identifier</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="barcode"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Barcode</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter barcode" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="price"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Price</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    placeholder="0.00"
-                    {...field}
-                    onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="quantity"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Quantity</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="0"
-                    {...field}
-                    onChange={(e) => field.onChange(Number.parseInt(e.target.value) || 0)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="in_stock"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-base">In Stock</FormLabel>
-                  <FormDescription>Mark this variation as available</FormDescription>
-                </div>
-                <FormControl>
-                  <Switch checked={field.value} onCheckedChange={field.onChange} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-lg font-medium">Attributes</h3>
-            <p className="text-sm text-muted-foreground">Add color, size, etc.</p>
+    <div className="grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
+      <Card>
+        <CardHeader>
+          <CardTitle>Variation Details</CardTitle>
+          <CardDescription>Basic information about the product variation.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="product_id">Product</Label>
+            <Select
+              value={data.product_id.toString()}
+              onValueChange={(value) => setData("product_id", Number.parseInt(value))}
+            >
+              <SelectTrigger id="product_id">
+                <SelectValue placeholder="Select a product" />
+              </SelectTrigger>
+              <SelectContent>
+                {products.map((product) => (
+                  <SelectItem key={product.id} value={product.id.toString()}>
+                    {product.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.product_id && <p className="text-sm text-red-500">{errors.product_id}</p>}
           </div>
-          <div className="flex gap-2">
+          <div className="grid gap-2">
+            <Label htmlFor="sku">SKU</Label>
             <Input
-              placeholder="Attribute name (e.g., Color)"
-              value={newKey}
-              onChange={(e) => setNewKey(e.target.value)}
+              id="sku"
+              type="text"
+              placeholder="Enter SKU"
+              value={data.sku}
+              onChange={(e) => setData("sku", e.target.value)}
             />
-            <Input
-              placeholder="Attribute value (e.g., Red)"
-              value={newValue}
-              onChange={(e) => setNewValue(e.target.value)}
-            />
-            <Button type="button" onClick={addAttribute}>
-              <Plus className="h-4 w-4" />
-            </Button>
+            {errors.sku && <p className="text-sm text-red-500">{errors.sku}</p>}
           </div>
-
-          {Object.keys(attributes).length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(attributes).map(([key, value]) => (
-                <Badge key={key} variant="secondary" className="text-sm">
-                  {key}: {value}
-                  <button
-                    type="button"
-                    onClick={() => removeAttribute(key)}
-                    className="ml-2 hover:text-red-600"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
+          <div className="grid gap-2">
+            <Label htmlFor="barcode">Barcode (Optional)</Label>
+            <Input
+              id="barcode"
+              type="text"
+              placeholder="Enter barcode"
+              value={data.barcode || ""}
+              onChange={(e) => setData("barcode", e.target.value)}
+            />
+            {errors.barcode && <p className="text-sm text-red-500">{errors.barcode}</p>}
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="price">Price</Label>
+              <Input
+                id="price"
+                type="number"
+                step="0.01"
+                placeholder="0.00"
+                value={data.price}
+                onChange={(e) => setData("price", Number.parseFloat(e.target.value))}
+              />
+              {errors.price && <p className="text-sm text-red-500">{errors.price}</p>}
             </div>
-          )}
-        </div>
+            <div className="grid gap-2">
+              <Label htmlFor="quantity">Quantity</Label>
+              <Input
+                id="quantity"
+                type="number"
+                step="1"
+                placeholder="0"
+                value={data.quantity}
+                onChange={(e) => setData("quantity", Number.parseInt(e.target.value))}
+              />
+              {errors.quantity && <p className="text-sm text-red-500">{errors.quantity}</p>}
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="in_stock"
+              checked={data.in_stock}
+              onCheckedChange={(checked) => setData("in_stock", Boolean(checked))}
+            />
+            <Label htmlFor="in_stock">In Stock</Label>
+            {errors.in_stock && <p className="text-sm text-red-500">{errors.in_stock}</p>}
+          </div>
+        </CardContent>
+      </Card>
 
-        <Button type="submit">{submitLabel}</Button>
-      </form>
-    </Form>
+      <Card>
+        <CardHeader>
+          <CardTitle>Attributes</CardTitle>
+          <CardDescription>Select attribute options for this variation.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          {attributes.map((attribute) => (
+            <div key={attribute.id} className="grid gap-2">
+              <Label className="font-semibold">{attribute.name}</Label>
+              <div className="flex flex-wrap gap-4">
+                {attribute.options.map((option) => (
+                  <div key={option.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`option-${option.id}`}
+                      checked={data.attribute_option_ids?.includes(option.id)}
+                      onCheckedChange={(checked) => handleAttributeOptionChange(option.id, Boolean(checked))}
+                    />
+                    <Label htmlFor={`option-${option.id}`}>{option.name}</Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+          {errors.attribute_option_ids && <p className="text-sm text-red-500">{errors.attribute_option_ids}</p>}
+        </CardContent>
+      </Card>
+    </div>
   )
 }
