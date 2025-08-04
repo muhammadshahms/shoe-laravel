@@ -75,7 +75,6 @@ export default function ShopPage() {
   const { products, brands, categories, filters } = usePage<InertiaProps>().props
   const { processing } = router as any
   const cartItemCount = useCartStore(selectCartItemCount) // Use the selector for item count
-  const [isCartOpen, setIsCartOpen] = useState(false)
 
   const [currentFilters, setCurrentFilters] = useState({
     search: filters.search || "",
@@ -386,7 +385,7 @@ export default function ShopPage() {
                             variant="outline"
                             size="lg"
                             className="border-white/20 text-white hover:bg-white/10 shrink-0 relative bg-transparent"
-                            onClick={() => setIsCartOpen(true)}
+                            onClick={() => useCartStore.getState().setOpen(true)}
                           >
                             <ShoppingCart className="w-5 h-5 mr-2" />
                             Cart

@@ -27,6 +27,7 @@ import AppLogoIcon from "../app-logo-icon"
 import AppLogo from "../app-logo"
 // import { useCart } from "@/hooks/use-cart"
 import { CartSheet } from "../CartSheet"
+import { selectCartItemCount, useCartStore } from "@/hooks/cart-store"
 
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -34,9 +35,10 @@ const Header = () => {
     const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [searchQuery, setSearchQuery] = useState("")
     const [isScrolled, setIsScrolled] = useState(false)
-    const [cartCount] = useState(3)
     const [wishlistCount] = useState(5)
     const [notificationCount] = useState(2)
+    const cartCount = useCartStore(selectCartItemCount)
+    const openCart = () => useCartStore.getState().setOpen(true)
     // const { addItem, cartItemCount } = useCart() // Use the cart hook
     const [isCartOpen, setIsCartOpen] = useState(false) // State for cart sheet
 
@@ -305,17 +307,17 @@ const Header = () => {
                                 variant="ghost"
                                 size="icon"
                                 className="relative text-white hover:bg-white/10 hover:text-yellow-400"
-                                onClick={() => setIsCartOpen(true)}
+                                onClick={() => useCartStore.getState().setOpen(true)}
                             >
                                 <ShoppingCart className="w-6 h-6 " />
-                                {/* {cartItemCount > 0 && (
+                                {cartCount > 0 && (
                                     <Badge className="absolute -top-1 -right-1 bg-yellow-400 text-black rounded-full px-2 py-0.5 text-xs font-bold">
-                                        {cartItemCount}
+                                        {cartCount}
                                     </Badge>
-                                )} */}
+                                )}
                                 <span className="sr-only">View Cart</span>
                             </Button>
-                                
+
                             {/* User Menu */}
                             <div className="relative">
                                 <Button
@@ -451,7 +453,7 @@ const Header = () => {
                     }}
                 />
             )}
-            <CartSheet isOpen={isCartOpen} onOpenChange={setIsCartOpen} />
+            <CartSheet />
 
         </>
     )

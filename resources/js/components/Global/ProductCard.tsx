@@ -43,7 +43,7 @@ export default function ProductCard({
   const handleAddToCart = () => {
     const numericPrice = Number.parseFloat(price.replace(/[^0-9.-]+/g, ""))
     if (isNaN(numericPrice)) {
-      console.error("Invalid price for product:", title, price)
+      // console.error("Invalid price for product:", title, price)
       return
     }
 
@@ -80,7 +80,7 @@ export default function ProductCard({
           </div>
           {/* Rating Badge */}
           <div className="absolute top-3 right-3 bg-gradient-to-r from-yellow-400 to-orange-400 text-black px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
-            ⭐ {rating} ({reviews})
+            <Star className="w-4 h-4 inline-block mr-1" /> {rating} ({reviews})
           </div>
           {/* Discount Badge */}
           {showDiscount && originalPrice && (
