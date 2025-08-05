@@ -16,7 +16,7 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::get('/', function () {
         if (Gate::denies('dashboard', request()->user())) {
             return redirect('/');
-           }
+        }
         return Inertia::render('dashboard');
     })->name('dashboard');
 

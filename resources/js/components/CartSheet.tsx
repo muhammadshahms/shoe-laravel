@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Minus, Plus, Trash2, ShoppingCart } from "lucide-react"
 import { selectCartTotal, useCartStore } from "@/hooks/cart-store"
+import { router } from "@inertiajs/react"
 
 export function CartSheet() {
   const cartItems = useCartStore((state) => state.cartItems)
@@ -46,6 +47,11 @@ export function CartSheet() {
                     <div className="flex-1 grid gap-1">
                       <h4 className="font-semibold text-lg">{item.title}</h4>
                       <p className="font-bold text-lg">${(item.price * item.quantity).toFixed(2)}</p>
+                      {item.options?.map((opt) => (
+                        <div key={opt.name} className="text-sm text-muted-foreground">
+                          {opt.name}: {opt.value}
+                        </div>
+                      ))}
                       <div className="flex items-center gap-2 mt-2">
                         <Button
                           variant="outline"
@@ -93,7 +99,21 @@ export function CartSheet() {
                   ${cartTotal.toFixed(2)}
                 </span>
               </div>
-              <Button className="w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-black hover:from-yellow-300 hover:to-orange-300 font-semibold rounded-xl shadow-lg hover:shadow-yellow-400/25 transition-all duration-300">
+              <Button className="w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-black hover:from-yellow-300 hover:to-orange-300 font-semibold rounded-xl shadow-lg hover:shadow-yellow-400/25 transition-all duration-300"
+                disabled={cartItems.length === 0}
+                onClick={() =>
+                  router.post("/checkout", {}, {
+                    onSuccess: () => {
+                      // toast.success("Order placed successfully!") // optional feedback
+                      alert("Order placed successfully! Redirecting to checkout...") // optional feedback
+                    },
+                    onError: (errors) => {
+                      // toast.error(errors.error || "Checkout failed")
+                      alert(errors.error || "Checkout failed") // optional feedback
+                    }
+                  })
+                }
+              >
                 Proceed to Checkout
               </Button>
               <Button

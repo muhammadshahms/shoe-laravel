@@ -9,7 +9,7 @@ use App\Models\User;
 use App\Models\Product;
 use App\Models\CartItem;
 use Illuminate\Http\Request;
-
+use Inertia\Inertia;
 
 class OrderController extends Controller
 {
@@ -42,8 +42,13 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
-        //
+        $order->load(['cartItems.product']);
+
+        return Inertia::render('Orders/Show', [
+            'order' => $order,
+        ]);
     }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -68,6 +73,8 @@ class OrderController extends Controller
     {
         //
     }
+
+
     public function checkout()
     {
         DB::beginTransaction();
@@ -98,7 +105,6 @@ class OrderController extends Controller
                 }
 
                 $lockedProducts[$item->product_id] = $product;
-
                 $total += $product->price * $item->qty;
             }
 
@@ -106,18 +112,23 @@ class OrderController extends Controller
             $order = Order::create([
                 'user_id' => $user->id,
                 'status' => Order::STATUS_PENDING,
-                'total' => $total,
+                'grand_total' => $total,
+                'item_count' => $cartItems->sum('qty'),
+                
             ]);
 
             if (!$order) {
                 throw new \Exception("Failed to create order.");
             }
 
-            // Attach products and update stock
+            // Create CartItem (OrderItem) entries and update stock
             foreach ($cartItems as $item) {
                 $product = $lockedProducts[$item->product_id];
 
-                $order->products()->attach($product->id, [
+                CartItem::create([
+                    'order_id' => $order->id,
+                    'user_id' => $user->id,
+                    'product_id' => $product->id,
                     'quantity' => $item->qty,
                     'price' => $product->price,
                 ]);
@@ -125,7 +136,7 @@ class OrderController extends Controller
                 $product->decrement('quantity', $item->qty);
             }
 
-            // Clear cart
+            // Clear user cart
             $user->cartItems()->delete();
 
             DB::commit();
@@ -134,7 +145,6 @@ class OrderController extends Controller
                 ->with('success', 'Order placed successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
-
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }

@@ -10,6 +10,7 @@ interface CartItem {
   price: number
   image: string
   quantity: number
+  options?: { name: string; value: string }[] // Optional product options like size, color, etc.
 }
 
 // Define the structure of a product as received from Inertia props

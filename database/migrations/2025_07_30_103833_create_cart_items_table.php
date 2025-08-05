@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
 
             // Quantity
-            $table->unsignedInteger('qty')->default(1);
+            $table->unsignedInteger('quantity')->default(1);
 
             $table->timestamps();
         });

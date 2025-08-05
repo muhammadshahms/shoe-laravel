@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -16,13 +17,9 @@ Route::get('shop', [ProductController::class, 'shop'])->name('shop');
 
 //productdetails
 Route::get('product-details/{product:slug}', [ProductController::class, 'productDetail'])->name('product-details.show');
-
-
-// Route::middleware(['auth', 'verified'])->group(function () {
-//     Route::get('dashboard', function () {
-//         return Inertia::render('dashboard');
-//     })->name('dashboard');
-// });
+Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+Route::get('/checkout', fn () => Inertia::render('Orders/Checkout'))->middleware('auth')->name('checkout.page');
+Route::post('/checkout', [OrderController::class, 'checkout'])->middleware('auth')->name('checkout');
 
 require __DIR__ . '/dashboard.php';
 require __DIR__ . '/auth.php';
