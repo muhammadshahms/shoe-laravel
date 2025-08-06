@@ -10,7 +10,7 @@ use App\Models\Product;
 use App\Models\CartItem;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-
+use Illuminate\Support\Str;
 class OrderController extends Controller
 {
     /**
@@ -74,71 +74,114 @@ class OrderController extends Controller
         //
     }
 
-
-    public function checkout()
+    public function checkout(Request $request)
     {
         DB::beginTransaction();
 
         try {
             $user = Auth::user();
-            /** @var \App\Models\User $user */
 
-            $cartItems = $user->cartItems()->with('product')->get();
+            $validated = $request->validate([
+                // Shipping
+                'shipping_full_name' => 'required|string|max:255',
+                'shipping_address' => 'required|string',
+                'shipping_city' => 'required|string',
+                'shipping_state' => 'nullable|string',
+                'shipping_zip_code' => 'nullable|string',
+                'shipping_country' => 'required|string',
+                'shipping_phone' => 'required|string|max:20',
 
-            if ($cartItems->isEmpty()) {
+                // Billing
+                'billing_full_name' => 'required|string|max:255',
+                'billing_email' => 'required|email|max:255',
+                'billing_address' => 'required|string',
+                'billing_city' => 'required|string',
+                'billing_state' => 'nullable|string',
+                'billing_zip_code' => 'nullable|string',
+                'billing_country' => 'required|string',
+                'billing_phone' => 'required|string|max:20',
+
+                // Payment
+                'payment_method' => 'required|in:cod',
+                'payment_status' => 'required|in:unpaid,paid',
+                'notes' => 'nullable|string',
+            ]);
+
+            $cartItems = $request->input('cartItems', []);
+
+            if (empty($cartItems)) {
                 return back()->withErrors(['error' => 'Your cart is empty.']);
             }
 
             $total = 0;
             $lockedProducts = [];
 
-            // Lock and validate products
+            // Validate stock & lock products
             foreach ($cartItems as $item) {
-                $product = Product::lockForUpdate()->find($item->product_id);
+                $product = Product::lockForUpdate()->find($item['id']);
 
                 if (!$product) {
-                    throw new \Exception("Product not found (ID: {$item->product_id}).");
+                    throw new \Exception("Product not found (ID: {$item['id']})");
                 }
 
-                if ($product->quantity < $item->qty) {
+                if ($product->quantity < $item['quantity']) {
                     throw new \Exception("Product {$product->name} is out of stock.");
                 }
 
-                $lockedProducts[$item->product_id] = $product;
-                $total += $product->price * $item->qty;
+                $lockedProducts[$product->id] = $product;
+                $total += $product->price * $item['quantity'];
             }
 
-            // Create the order
+            // Create order
             $order = Order::create([
                 'user_id' => $user->id,
                 'status' => Order::STATUS_PENDING,
+                'order_number' => strtoupper(Str::random(10)), // or custom logic
                 'grand_total' => $total,
-                'item_count' => $cartItems->sum('qty'),
-                
+                'item_count' => collect($cartItems)->sum('quantity'),
+                'payment_method' => $validated['payment_method'],
+                'payment_status' => $validated['payment_status'],
+
+                // Shipping
+                'shipping_full_name' => $validated['shipping_full_name'],
+                'shipping_address' => $validated['shipping_address'],
+                'shipping_city' => $validated['shipping_city'],
+                'shipping_state' => $validated['shipping_state'],
+                'shipping_zip_code' => $validated['shipping_zip_code'],
+                'shipping_country' => $validated['shipping_country'],
+                'shipping_phone' => $validated['shipping_phone'],
+
+                // Billing
+                'billing_full_name' => $validated['billing_full_name'],
+                'billing_email' => $validated['billing_email'],
+                'billing_address' => $validated['billing_address'],
+                'billing_city' => $validated['billing_city'],
+                'billing_state' => $validated['billing_state'],
+                'billing_zip_code' => $validated['billing_zip_code'],
+                'billing_country' => $validated['billing_country'],
+                'billing_phone' => $validated['billing_phone'],
+
+                'notes' => $validated['notes'] ?? null,
             ]);
-
-            if (!$order) {
-                throw new \Exception("Failed to create order.");
-            }
-
-            // Create CartItem (OrderItem) entries and update stock
+            // Attach cart items to the order
             foreach ($cartItems as $item) {
-                $product = $lockedProducts[$item->product_id];
+                $product = $lockedProducts[$item['id']];
 
                 CartItem::create([
                     'order_id' => $order->id,
                     'user_id' => $user->id,
                     'product_id' => $product->id,
-                    'quantity' => $item->qty,
+                    'quantity' => $item['quantity'],
                     'price' => $product->price,
                 ]);
 
-                $product->decrement('quantity', $item->qty);
+                // Reduce stock
+                $product->decrement('quantity', $item['quantity']);
             }
 
-            // Clear user cart
-            $user->cartItems()->delete();
+            // Clear DB cart (optional, if syncing)
 
+            $user->cartItems()->delete();
             DB::commit();
 
             return redirect()->route('orders.show', $order->id)

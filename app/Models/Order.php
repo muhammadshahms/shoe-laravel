@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Str;
 
 class Order extends Model
 {
@@ -18,7 +19,12 @@ class Order extends Model
     const STATUS_PROCESSING = 'processing';
     const STATUS_COMPLETED = 'completed';
     const STATUS_CANCELLED = 'cancelled';
-
+    protected static function booted()
+    {
+        static::creating(function ($order) {
+            $order->order_number = strtoupper(Str::random(10));
+        });
+    }
     protected $fillable = [
         'user_id',
         'is_guest',

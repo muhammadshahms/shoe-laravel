@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->foreignId('order_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
+            $
 
             // Quantity
             $table->unsignedInteger('quantity')->default(1);
