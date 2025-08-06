@@ -52,11 +52,11 @@ const Header = () => {
     }, [])
 
     const navigationItems = [
-        {
-            name: "Home",
-            href: "#",
-            hasDropdown: false,
-        },
+        // {
+        //     name: "Home",
+        //     href: "#",
+        //     hasDropdown: false,
+        // },
         {
             name: "Categories",
             href: "#",
@@ -82,12 +82,12 @@ const Header = () => {
                 { name: "Converse", href: "#" },
             ],
         },
-        {
-            name: "Sale",
-            href: "#",
-            hasDropdown: false,
-            badge: "Hot",
-        },
+        // {
+        //     name: "Sale",
+        //     href: "#",
+        //     hasDropdown: false,
+        //     badge: "Hot",
+        // },
         {
             name: "About",
             href: "#",
@@ -320,7 +320,7 @@ const Header = () => {
 
                             {/* User Menu */}
                             <div className="relative">
-                                <Button
+                                {/* <Button
                                     variant="ghost"
                                     className="flex items-center gap-2 text-white hover:text-yellow-400 hover:bg-gray-800"
                                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
@@ -331,10 +331,10 @@ const Header = () => {
                                     </Avatar>
                                     <span className="hidden md:block">John Doe</span>
                                     <ChevronDown className="w-4 h-4" />
-                                </Button>
+                                </Button> */}
 
                                 {/* User Dropdown */}
-                                <AnimatePresence>
+                                {/* <AnimatePresence>
                                     {isUserMenuOpen && (
                                         <motion.div
                                             className="absolute top-full right-0 mt-2 w-56 bg-gray-800 rounded-lg shadow-xl border border-gray-700 z-50"
@@ -374,7 +374,7 @@ const Header = () => {
                                             </div>
                                         </motion.div>
                                     )}
-                                </AnimatePresence>
+                                </AnimatePresence> */}
                             </div>
 
                             {/* Mobile Menu Toggle */}

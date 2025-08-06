@@ -1,12 +1,13 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, ShoppingCart, Star, Sparkles, TrendingUp, Award, HeartIcon } from "lucide-react"
+import { ChevronLeft, ChevronRight, ShoppingCart, Star, Sparkles, TrendingUp, Award, HeartIcon, Heart } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { motion } from "framer-motion"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Header from "@/components/Global/Header"
 import Footer from "@/components/Global/Footer"
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 
 type Product = {
   title: string
@@ -124,6 +125,53 @@ export default function AllRunPage() {
   const [currentPages, setCurrentPages] = useState(Object.fromEntries(categories.map((cat) => [cat, 0])))
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
 
+  const [currentSlides, setCurrentSlides] = useState({})
+
+  // Initialize current slides for each category
+  useEffect(() => {
+    const initialSlides = {}
+    categories.forEach(cat => {
+      initialSlides[cat] = 0
+    })
+    setCurrentSlides(initialSlides)
+  }, [])
+
+  const nextSlide = (category) => {
+    const products = allProducts[category] || []
+    const maxSlide = Math.max(0, products.length - getVisibleItems())
+    setCurrentSlides(prev => ({
+      ...prev,
+      [category]: Math.min((prev[category] || 0) + 1, maxSlide)
+    }))
+  }
+
+  const prevSlide = (category) => {
+    setCurrentSlides(prev => ({
+      ...prev,
+      [category]: Math.max((prev[category] || 0) - 1, 0)
+    }))
+  }
+
+  const getVisibleItems = () => {
+    if (typeof window !== 'undefined') {
+      if (window.innerWidth >= 1024) return 3 // lg screens
+      if (window.innerWidth >= 768) return 2  // md screens
+      return 1 // sm screens
+    }
+    return 3
+  }
+
+  const [visibleItems, setVisibleItems] = useState(3)
+
+  useEffect(() => {
+    const handleResize = () => {
+      setVisibleItems(getVisibleItems())
+    }
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
   const setCurrentPage = (cat: any, page: any) => {
     setCurrentPages((prev: any) => ({
       ...prev,
@@ -355,9 +403,8 @@ export default function AllRunPage() {
                 Discover our extensive collection of premium footwear designed for every occasion and lifestyle.
               </p>
             </motion.div>
-
-            <Tabs defaultValue="All" className="w-full">
-              <TabsList className="flex justify-center flex-wrap gap-4 mb-8 bg-transparent border-none">
+            <Tabs defaultValue="All" className="w-full max-w-7xl">
+              <TabsList className="flex justify-center flex-wrap gap-4 mb-12 bg-transparent border-none">
                 {categories.map((cat, index) => (
                   <motion.div
                     key={cat}
@@ -376,13 +423,9 @@ export default function AllRunPage() {
               </TabsList>
 
               {categories.map((cat) => {
-                const allCatProducts = allProducts[cat] || []
-                const currentPage = currentPages[cat] || 0
-                const totalPages = Math.ceil(allCatProducts.length / productsPerPage)
-                const paginatedProducts = allCatProducts.slice(
-                  currentPage * productsPerPage,
-                  currentPage * productsPerPage + productsPerPage,
-                )
+                const products = allProducts[cat] || []
+                const currentSlide = currentSlides[cat] || 0
+                const maxSlide = Math.max(0, products.length - visibleItems)
 
                 return (
                   <TabsContent key={cat} value={cat}>
@@ -391,141 +434,109 @@ export default function AllRunPage() {
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ duration: 0.6, ease: "easeOut" }}
-                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+                      className="relative"
                     >
-                      {paginatedProducts.map((product, i) => (
-                        <motion.div
-                          key={i}
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          whileInView={{ opacity: 1, scale: 1 }}
-                          whileHover={{ scale: 1.05, y: -10 }}
-                          transition={{ duration: 0.4 }}
-                          className="group relative"
-                        >
-                          {/* Glass Effect Card */}
-                          <div className="relative rounded-3xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 p-6 shadow-2xl hover:shadow-yellow-400/20 transition-all duration-500 overflow-hidden">
-                            {/* Background Gradient */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-                            {/* Product Image */}
-                            <div className="relative mb-6">
-                              <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl p-4 backdrop-blur-sm">
-                                <motion.img
-                                  src={product.image || "/placeholder.svg"}
-                                  alt={product.title}
-                                  className="w-full h-48 object-contain drop-shadow-lg"
-                                  whileHover={{ scale: 1.1, rotate: 5 }}
-                                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                                />
-                              </div>
-
-                              {/* Rating Badge */}
-                              <div className="absolute top-3 right-3 bg-gradient-to-r from-yellow-400 to-orange-400 text-black px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
-                                ⭐ {product.rating} ({product.reviews})
-                              </div>
-
-                              {/* Wishlist Button */}
-                              <motion.button
-                                className="absolute top-3 left-3 w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20 hover:bg-white/20 transition-all duration-300"
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                              >
-                                <motion.div
-                                  whileHover={{ scale: 1.2 }}
-                                  className="text-white hover:text-red-400 transition-colors"
-                                >
-                                  <HeartIcon className="w-4 h-4 text-gray-400" />
-                                </motion.div>
-                              </motion.button>
-                            </div>
-
-                            {/* Product Info */}
-                            <div className="relative z-10">
-                              <h4 className="text-white text-xl font-bold mb-2 group-hover:text-yellow-400 transition-colors duration-300">
-                                {product.title}
-                              </h4>
-                              <p className="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent mb-2">
-                                {product.price}
-                              </p>
-                              <p className="text-gray-400 text-sm mb-3">Premium Collection 2024</p>
-
-                              {/* Star Rating */}
-                              <div className="flex items-center gap-1 mb-6">
-                                {[...Array(5)].map((_, idx) => (
-                                  <Star key={idx} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                                ))}
-                                <span className="text-gray-400 text-sm ml-2">({product.reviews})</span>
-                              </div>
-
-                              {/* Action Buttons */}
-                              <div className="flex gap-3">
-                                <Button
-                                  className="flex-1 bg-gradient-to-r from-yellow-400 to-orange-400 text-black hover:from-yellow-300 hover:to-orange-300 font-semibold rounded-xl shadow-lg hover:shadow-yellow-400/25 transition-all duration-300"
-                                  onClick={() => setSelectedProduct(product)}
-                                >
-                                  View Details
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="icon"
-                                  className="border-white/20 text-white hover:bg-white/10 rounded-xl backdrop-blur-sm bg-transparent"
-                                >
-                                  <ShoppingCart className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </div>
-
-                            {/* Shine Effect */}
-                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </motion.div>
-
-                    {totalPages > 1 && (
-                      <motion.div
-                        className="flex justify-center items-center gap-4 mt-12"
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6 }}
+                      {/* Shadcn Carousel */}
+                      <Carousel
+                        opts={{
+                          align: "start",
+                          loop: true,
+                        }}
+                        className="w-full"
                       >
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="rounded-full bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-gradient-to-r hover:from-yellow-400 hover:to-orange-400 hover:text-black transition-all duration-300"
-                          onClick={() => setCurrentPage(cat, Math.max(currentPage - 1, 0))}
-                          disabled={currentPage === 0}
-                        >
-                          <ChevronLeft className="w-4 h-4" />
-                        </Button>
+                        <CarouselContent className="-ml-2 md:-ml-4">
+                          {products.map((product, i) => (
+                            <CarouselItem key={i} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+                              <motion.div
+                                className="group relative h-full"
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                whileHover={{ scale: 1.05, y: -10 }}
+                                transition={{ duration: 0.4 }}
+                              >
+                                {/* Glass Effect Card */}
+                                <div className="relative rounded-3xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 p-6 shadow-2xl hover:shadow-yellow-400/20 transition-all duration-500 overflow-hidden h-full">
+                                  {/* Background Gradient */}
+                                  <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-                        <div className="flex items-center gap-2">
-                          {Array.from({ length: totalPages }, (_, i) => (
-                            <button
-                              key={i}
-                              className={`w-3 h-3 rounded-full transition-all duration-300 ${i === currentPage
-                                ? "bg-gradient-to-r from-yellow-400 to-orange-400"
-                                : "bg-white/20 hover:bg-white/40"
-                                }`}
-                              onClick={() => setCurrentPage(cat, i)}
-                            />
+                                  {/* Product Image */}
+                                  <div className="relative mb-6">
+                                    <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl p-4 backdrop-blur-sm">
+                                      <motion.img
+                                        src={product.image}
+                                        alt={product.title}
+                                        className="w-full h-48 object-contain drop-shadow-lg"
+                                        whileHover={{ scale: 1.1, rotate: 5 }}
+                                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                      />
+                                    </div>
+
+                                    {/* Rating Badge */}
+                                    <div className="absolute top-3 right-3 bg-gradient-to-r from-yellow-400 to-orange-400 text-black px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
+                                      ⭐ {product.rating} ({product.reviews})
+                                    </div>
+
+                                    {/* Wishlist Button */}
+                                    <motion.button
+                                      className="absolute top-3 left-3 w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20 hover:bg-white/20 transition-all duration-300"
+                                      whileHover={{ scale: 1.1 }}
+                                      whileTap={{ scale: 0.9 }}
+                                    >
+                                      <Heart className="w-4 h-4 text-gray-400 hover:text-red-400 transition-colors" />
+                                    </motion.button>
+                                  </div>
+
+                                  {/* Product Info */}
+                                  <div className="relative z-10">
+                                    <h4 className="text-white text-xl font-bold mb-2 group-hover:text-yellow-400 transition-colors duration-300">
+                                      {product.title}
+                                    </h4>
+                                    <p className="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent mb-2">
+                                      {product.price}
+                                    </p>
+                                    <p className="text-gray-400 text-sm mb-3">Premium Collection 2024</p>
+
+                                    {/* Star Rating */}
+                                    <div className="flex items-center gap-1 mb-6">
+                                      {[...Array(5)].map((_, idx) => (
+                                        <Star key={idx} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                      ))}
+                                      <span className="text-gray-400 text-sm ml-2">({product.reviews})</span>
+                                    </div>
+
+                                    {/* Action Buttons */}
+                                    <div className="flex gap-3">
+                                      <Button
+                                        className="flex-1 bg-gradient-to-r from-yellow-400 to-orange-400 text-black hover:from-yellow-300 hover:to-orange-300 font-semibold rounded-xl shadow-lg hover:shadow-yellow-400/25 transition-all duration-300"
+                                        onClick={() => setSelectedProduct(product)}
+                                      >
+                                        View Details
+                                      </Button>
+                                      <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="border-white/20 text-white hover:bg-white/10 rounded-xl backdrop-blur-sm bg-transparent"
+                                      >
+                                        <ShoppingCart className="w-4 h-4" />
+                                      </Button>
+                                    </div>
+                                  </div>
+
+                                  {/* Shine Effect */}
+                                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            </CarouselItem>
                           ))}
-                        </div>
+                        </CarouselContent>
 
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="rounded-full bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-gradient-to-r hover:from-yellow-400 hover:to-orange-400 hover:text-black transition-all duration-300"
-                          onClick={() => setCurrentPage(cat, Math.min(currentPage + 1, totalPages - 1))}
-                          disabled={currentPage === totalPages - 1}
-                        >
-                          <ChevronRight className="w-4 h-4" />
-                        </Button>
-                      </motion.div>
-                    )}
+                        {/* Custom styled navigation buttons */}
+                        <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-gradient-to-r hover:from-yellow-400 hover:to-orange-400 hover:text-black transition-all duration-300" />
+                        <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-gradient-to-r hover:from-yellow-400 hover:to-orange-400 hover:text-black transition-all duration-300" />
+                      </Carousel>
+                    </motion.div>
                   </TabsContent>
                 )
               })}
@@ -544,125 +555,19 @@ export default function AllRunPage() {
               Featured Products
             </motion.h3>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              {/* Left Side - Features */}
-              <motion.div
-                className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl"
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-              >
-                <h4 className="text-3xl font-bold text-white mb-8">Unique Features Of Latest & Trending Products</h4>
-                <div className="space-y-6">
-                  <motion.div
-                    className="flex items-start gap-4 p-4 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all duration-300"
-                    whileHover={{ scale: 1.02 }}
-                  >
-                    <div className="w-4 h-4 bg-gradient-to-r from-red-500 to-pink-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <p className="text-gray-300 leading-relaxed">
-                      Advanced cushioning technology with premium materials for maximum comfort and durability
-                    </p>
-                  </motion.div>
-                  <motion.div
-                    className="flex items-start gap-4 p-4 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all duration-300"
-                    whileHover={{ scale: 1.02 }}
-                  >
-                    <div className="w-4 h-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <p className="text-gray-300 leading-relaxed">
-                      Breathable mesh construction with moisture-wicking properties for all-day comfort
-                    </p>
-                  </motion.div>
-                  <motion.div
-                    className="flex items-start gap-4 p-4 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all duration-300"
-                    whileHover={{ scale: 1.02 }}
-                  >
-                    <div className="w-4 h-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <p className="text-gray-300 leading-relaxed">
-                      Ergonomic design with superior arch support and shock absorption technology
-                    </p>
-                  </motion.div>
-                </div>
-
-                <div className="flex items-center gap-6 mt-10 p-6 rounded-2xl bg-gradient-to-r from-yellow-400/10 to-orange-400/10 backdrop-blur-sm border border-yellow-400/20">
-                  <Button className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black px-8 py-3 hover:from-yellow-300 hover:to-orange-300 font-semibold rounded-xl shadow-lg">
-                    Shop Now
-                  </Button>
-                  <div className="text-white">
-                    <span className="text-xl font-bold">Nike Air Max Pro</span>
-                    <br />
-                    <span className="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
-                      $210.00
-                    </span>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Right Side - Product Showcase */}
-              <motion.div
-                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl"
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-              >
-                {/* Left sidebar with small shoe images */}
-                <div className="absolute left-6 top-8 flex flex-col gap-4 z-10">
-                  {["/1.png", "/2.png", "/3.png", "/4.png"].map((img, index) => (
-                    <motion.div
-                      key={index}
-                      className="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-xl p-2 border border-white/20 hover:bg-white/20 transition-all duration-300 cursor-pointer"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <img
-                        src={img || "/placeholder.svg"}
-                        alt={`Shoe ${index + 1}`}
-                        className="w-full h-full object-contain"
-                      />
-                    </motion.div>
-                  ))}
-                </div>
-
-                {/* Main product area */}
-                <div className="bg-gradient-to-br from-teal-600/80 to-teal-800/80 backdrop-blur-sm rounded-3xl p-8 ml-20 relative overflow-hidden min-h-[400px] border border-teal-400/20">
-                  {/* Background Effects */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-teal-400/10 to-transparent"></div>
-
-                  {/* Main shoe image */}
-                  <div className="flex justify-center items-center h-48 mb-8">
-                    <motion.img
-                      src="/3.png"
-                      alt="Nike Running Shoe"
-                      className="w-64 h-auto object-contain drop-shadow-2xl"
-                      initial={{ scale: 0.9, rotate: -5 }}
-                      whileHover={{ scale: 1.1, rotate: 5, y: -10 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    />
-                  </div>
-
-                  {/* Product info */}
-                  <div className="flex flex-col items-center gap-3 text-white">
-                    <h4 className="text-2xl font-bold">Nike Air Max Pro</h4>
-                    <p className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
-                      $210
-                    </p>
-                    {/* Rating */}
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className="text-lg font-semibold border-r border-white/30 pr-3">4.9</span>
-                      <div className="flex items-center gap-1">
-                        <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm text-gray-300">(2.5k+ reviews)</span>
-                      </div>
-                    </div>
-                    {/* Buy Now Button */}
-                    <Button className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black w-full hover:from-yellow-300 hover:to-orange-300 font-semibold py-3 rounded-xl shadow-lg">
-                      Add to Cart
-                    </Button>
-                  </div>
-                </div>
-              </motion.div>
+            <div className="relative max-w-7xl mx-auto mb-16">
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+                <img
+                  src="/shoe-banner.jpg"
+                  alt="Adidas Terrex CMTK Gore-Tex Outdoor Running Shoes"
+                  className="w-full object-cover"
+                  style={{ height: '300px' }}
+                />
+              </div>
             </div>
+
+
+
           </section>
         </div>
         <Footer />
