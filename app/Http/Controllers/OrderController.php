@@ -170,21 +170,18 @@ class OrderController extends Controller
             foreach ($cartItems as $item) {
                 $product = $lockedProducts[$item['id']];
 
-                CartItem::create([
+                $cart = CartItem::create([
                     'order_id' => $order->id,
                     'user_id' => $user->id,
                     'product_id' => $product->id,
                     'quantity' => $item['quantity'],
                     'price' => $product->price,
                 ]);
-
+                // dd($cart);
                 // Reduce stock
                 $product->decrement('quantity', $item['quantity']);
             }
 
-            // Clear DB cart (optional, if syncing)
-
-            $user->cartItems()->delete();
             DB::commit();
             return redirect()->route('orders.show', $order->id)
                 ->with('success', 'Order placed successfully!');

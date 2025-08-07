@@ -11,7 +11,8 @@ use App\Models\User;
 class CartItem extends Model
 {
     use HasFactory;
-
+    //table name
+    protected $table = 'cart_items';
     protected $fillable = [
         'order_id',
         'product_id',
