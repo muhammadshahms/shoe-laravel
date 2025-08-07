@@ -47,11 +47,11 @@ export function CartSheet() {
                     <div className="flex-1 grid gap-1">
                       <h4 className="font-semibold text-lg">{item.title}</h4>
                       <p className="font-bold text-lg">${(item.price * item.quantity).toFixed(2)}</p>
-                      {item.options?.map((opt) => (
+                      {/* {item.options?.map((opt) => (
                         <div key={opt.name} className="text-sm text-muted-foreground">
                           {opt.name}: {opt.value}
                         </div>
-                      ))}
+                      ))} */}
                       <div className="flex items-center gap-2 mt-2">
                         <Button
                           variant="outline"
@@ -104,6 +104,9 @@ export function CartSheet() {
                 onClick={() =>
                   router.post("/checkout", {}, {
                     onSuccess: () => {
+                      router.visit("/checkout", {
+                        preserveScroll: true,
+                      });
                       // toast.success("Order placed successfully!") // optional feedback
                       alert("Order placed successfully! Redirecting to checkout...") // optional feedback
                     },

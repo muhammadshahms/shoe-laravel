@@ -91,7 +91,9 @@ export default function Checkout() {
       ...data,
       cartItems: cartItems.map((item) => ({
         id: item.id,
-        quantity: item.quantity, 
+        quantity: item.quantity,
+        price: item.price,
+        product: { id: item.id, name: item.title, main_image_url: item.image },
       })),
     }
 
@@ -107,112 +109,118 @@ export default function Checkout() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans">
+    <div className="text-white min-h-screen font-sans bg-gradient-to-b from-gray-900 via-black to-gray-900 relative overflow-hidden">
       <Header />
-      <Head title="Checkout" />
+      {/* Background Effects */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-yellow-400/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-400/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-pink-500/10 rounded-full blur-3xl"></div>
+      </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <form onSubmit={handleSubmit(onSubmit)} className="max-w-6xl mx-auto p-6 space-y-6">
+          <h1 className="text-3xl font-bold">Checkout</h1>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* LEFT SECTION: Billing + Shipping */}
+            <div className="space-y-6 col-span-2">
+              <Card className="bg-gray-800 text-white p-4 border border-gray-700 rounded-lg shadow-lg">
+                <CardHeader><CardTitle>Shipping Info</CardTitle></CardHeader>
+                <CardContent className="space-y-3">
+                  <Input {...register("shipping_full_name")} placeholder="Full Name" />
+                  <Input {...register("shipping_phone")} placeholder="Phone" />
+                  <Textarea {...register("shipping_address")} placeholder="Address" />
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input {...register("shipping_city")} placeholder="City" />
+                    <Input {...register("shipping_state")} placeholder="State" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input {...register("shipping_zip_code")} placeholder="ZIP Code" />
+                    <Input {...register("shipping_country")} placeholder="Country" />
+                  </div>
+                </CardContent>
+              </Card>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="max-w-6xl mx-auto p-6 space-y-6">
-        <h1 className="text-3xl font-bold">Checkout</h1>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* LEFT SECTION: Billing + Shipping */}
-          <div className="space-y-6 col-span-2">
-            <Card>
-              <CardHeader><CardTitle>Shipping Info</CardTitle></CardHeader>
-              <CardContent className="space-y-3">
-                <Input {...register("shipping_full_name")} placeholder="Full Name" />
-                <Input {...register("shipping_phone")} placeholder="Phone" />
-                <Textarea {...register("shipping_address")} placeholder="Address" />
-                <div className="grid grid-cols-2 gap-4">
-                  <Input {...register("shipping_city")} placeholder="City" />
-                  <Input {...register("shipping_state")} placeholder="State" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <Input {...register("shipping_zip_code")} placeholder="ZIP Code" />
-                  <Input {...register("shipping_country")} placeholder="Country" />
-                </div>
-              </CardContent>
-            </Card>
+              <Card className="bg-gray-800 text-white p-4 border border-gray-700 rounded-lg shadow-lg">
+                <CardHeader><CardTitle>Billing Info</CardTitle></CardHeader>
+                <CardContent className="space-y-3">
+                  <Input {...register("billing_full_name")} placeholder="Full Name" />
+                  <Input {...register("billing_email")} placeholder="Email" />
+                  <Input {...register("billing_phone")} placeholder="Phone" />
+                  <Textarea {...register("billing_address")} placeholder="Address" />
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input {...register("billing_city")} placeholder="City" />
+                    <Input {...register("billing_state")} placeholder="State" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input {...register("billing_zip_code")} placeholder="ZIP Code" />
+                    <Input {...register("billing_country")} placeholder="Country" />
+                  </div>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader><CardTitle>Billing Info</CardTitle></CardHeader>
-              <CardContent className="space-y-3">
-                <Input {...register("billing_full_name")} placeholder="Full Name" />
-                <Input {...register("billing_email")} placeholder="Email" />
-                <Input {...register("billing_phone")} placeholder="Phone" />
-                <Textarea {...register("billing_address")} placeholder="Address" />
-                <div className="grid grid-cols-2 gap-4">
-                  <Input {...register("billing_city")} placeholder="City" />
-                  <Input {...register("billing_state")} placeholder="State" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <Input {...register("billing_zip_code")} placeholder="ZIP Code" />
-                  <Input {...register("billing_country")} placeholder="Country" />
-                </div>
-              </CardContent>
-            </Card>
+              <Card className="bg-gray-800 text-white p-4 border border-gray-700 rounded-lg shadow-lg">
+                <CardHeader><CardTitle>Additional Notes</CardTitle></CardHeader>
+                <CardContent>
+                  <Textarea {...register("notes")} placeholder="Any extra info?" />
+                </CardContent>
+              </Card>
+            </div>
 
-            <Card>
-              <CardHeader><CardTitle>Additional Notes</CardTitle></CardHeader>
-              <CardContent>
-                <Textarea {...register("notes")} placeholder="Any extra info?" />
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* RIGHT SECTION: Order Summary */}
-          <div className="space-y-4">
-            <Card>
-              <CardHeader><CardTitle>Order Summary</CardTitle></CardHeader>
-              <CardContent className="space-y-3">
-                {cartItems.length === 0 ? (
-                  <p className="text-gray-400">Cart is empty.</p>
-                ) : (
-                  <>
-                    {cartItems.map((item) => (
-                      <div key={item.id} className="flex justify-between items-center">
-                        <div>
-                          <p className="font-medium">{item.title}</p>
-                          <p className="text-sm text-gray-400">{item.quantity} × ${item.price.toFixed(2)}</p>
+            {/* RIGHT SECTION: Order Summary */}
+            <div className="space-y-4">
+              <Card className="bg-gray-800 text-white p-4 border border-gray-700 rounded-lg shadow-lg">
+                <CardHeader><CardTitle>Order Summary</CardTitle></CardHeader>
+                <CardContent className="space-y-3">
+                  {cartItems.length === 0 ? (
+                    <p className="text-gray-400">Cart is empty.</p>
+                  ) : (
+                    <>
+                      {cartItems.map((item) => (
+                        <div key={item.id} className="flex justify-between items-center">
+                          <div>
+                            <p className="font-medium">{item.title}</p>
+                            <p className="text-sm text-gray-400">{item.quantity} × ${item.price.toFixed(2)}</p>
+                          </div>
+                          <p className="font-bold">${(item.quantity * item.price).toFixed(2)}</p>
                         </div>
-                        <p className="font-bold">${(item.quantity * item.price).toFixed(2)}</p>
+                      ))}
+                      <Separator />
+                      <div className="flex justify-between font-bold text-xl">
+                        <span>Total:</span>
+                        <span>${cartTotal.toFixed(2)}</span>
                       </div>
-                    ))}
-                    <Separator />
-                    <div className="flex justify-between font-bold text-xl">
-                      <span>Total:</span>
-                      <span>${cartTotal.toFixed(2)}</span>
-                    </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader><CardTitle>Payment</CardTitle></CardHeader>
-              <CardContent>
-                <Label className="flex gap-2">
-                  <input
-                    type="radio"
-                    value="cod"
-                    {...register("payment_method")}
-                    checked
-                  />
-                  Cash on Delivery (COD)
-                </Label>
-              </CardContent>
-            </Card>
+              <Card className="bg-gray-800 text-white p-4 border border-gray-700 rounded-lg shadow-lg">
+                <CardHeader><CardTitle>Payment</CardTitle></CardHeader>
+                <CardContent>
+                  <Label className="flex gap-2">
+                    <input
+                      type="radio"
+                      value="cod"
+                      {...register("payment_method")}
+                      checked
+                    />
+                    Cash on Delivery (COD)
+                  </Label>
+                </CardContent>
+              </Card>
 
-            <Button
-              type="submit"
-              disabled={isSubmitting || cartItems.length === 0}
-              className="w-full bg-yellow-400 text-black hover:bg-yellow-300 font-semibold rounded-xl shadow-lg transition"
-            >
-              {isSubmitting ? "Placing Order..." : "Place Order"}
-            </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting || cartItems.length === 0}
+                className="w-full bg-yellow-400 text-black hover:bg-yellow-300 font-semibold rounded-xl shadow-lg transition"
+              >
+                {isSubmitting ? "Placing Order..." : "Place Order"}
+              </Button>
+            </div>
           </div>
-        </div>
-      </form>
+        </form>
 
+      </div>
       <Footer />
     </div>
   )

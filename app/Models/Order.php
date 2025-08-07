@@ -83,7 +83,7 @@ class Order extends Model
     }
 
     /**
-     * Relationship: Order has many cart items
+     * Relationship: Order has many cart items  
      */
     public function cartItems(): HasMany
     {

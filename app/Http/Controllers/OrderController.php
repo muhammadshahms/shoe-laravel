@@ -44,6 +44,9 @@ class OrderController extends Controller
     {
         $order->load(['cartItems.product']);
 
+
+        // dd($order);
+
         return Inertia::render('Orders/Show', [
             'order' => $order,
         ]);
@@ -136,7 +139,7 @@ class OrderController extends Controller
             $order = Order::create([
                 'user_id' => $user->id,
                 'status' => Order::STATUS_PENDING,
-                'order_number' => strtoupper(Str::random(10)), // or custom logic
+                'order_number' => 'ORD-' . strtoupper(Str::random(8)),
                 'grand_total' => $total,
                 'item_count' => collect($cartItems)->sum('quantity'),
                 'payment_method' => $validated['payment_method'],
@@ -183,9 +186,10 @@ class OrderController extends Controller
 
             $user->cartItems()->delete();
             DB::commit();
-
             return redirect()->route('orders.show', $order->id)
                 ->with('success', 'Order placed successfully!');
+
+
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withErrors(['error' => $e->getMessage()]);
