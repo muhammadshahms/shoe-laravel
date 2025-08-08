@@ -129,7 +129,7 @@ export default function ProductVariationForm({
                       checked={data.attribute_option_ids?.includes(option.id)}
                       onCheckedChange={(checked) => handleAttributeOptionChange(option.id, Boolean(checked))}
                     />
-                    <Label htmlFor={`option-${option.id}`}>{option.name}</Label>
+                    <Label htmlFor={`option-${option.id}`}>{option.label}</Label>
                   </div>
                 ))}
               </div>
