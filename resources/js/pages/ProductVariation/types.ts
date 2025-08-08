@@ -21,8 +21,8 @@ export interface Product {
 export interface AttributeOption {
   id: number
   attribute_id: number
-  name: string
-  attribute?: Attribute // Nested attribute for display
+  value: string
+  label: string
 }
 
 export interface Attribute {

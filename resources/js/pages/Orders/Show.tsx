@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import Header from "@/components/Global/Header"
 import Footer from "@/components/Global/Footer"
+import UserLayout from "@/layouts/user-layout"
 
 interface Props {
   order: {
@@ -33,16 +34,7 @@ export default function Show({ order }: Props) {
   return (
     <>
       <Head title={`Order #${order.order_number}`} />
-
-      <div className="text-white min-h-screen font-sans bg-gradient-to-b from-gray-900 via-black to-gray-900 relative overflow-hidden">
-        <Header />
-
-        {/* Background Effects */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-yellow-400/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-400/10 rounded-full blur-3xl" />
-          <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-pink-500/10 rounded-full blur-3xl" />
-        </div>
+      <UserLayout>
 
         {/* Page Content */}
         <div className="max-w-5xl mx-auto py-12 px-4 relative z-10">
@@ -58,7 +50,7 @@ export default function Show({ order }: Props) {
             </a>
           </div>
 
-          <Card className="bg-gray-800 text-white border border-gray-700 shadow-lg rounded-lg">
+          <Card className="bg-gray-800 text-white border border-gray-700 shadow-lg rounded-lg p-6">
             <CardHeader>
               <CardTitle className="text-2xl font-bold">Order Details</CardTitle>
               <div className="flex items-center justify-between mt-2">
@@ -134,8 +126,7 @@ export default function Show({ order }: Props) {
           </Card>
         </div>
 
-        <Footer />
-      </div>
+      </UserLayout>
     </>
   )
 }

@@ -14,6 +14,7 @@ import {
   RotateCcw,
   Share2,
   Sparkles,
+  User,
 } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { motion } from "framer-motion"
@@ -24,6 +25,7 @@ import ProductCard from "@/components/Global/ProductCard"
 import Footer from "@/components/Global/Footer"
 import { useCartStore } from "@/hooks/cart-store"
 import type { JSX } from "react/jsx-runtime"
+import UserLayout from "@/layouts/user-layout"
 
 interface Product {
   id: number
@@ -122,14 +124,7 @@ export default function ProductDetailPage({ product, mainImage, gallery }: Produ
   }
   return (
     <>
-      <div className="text-white min-h-screen font-sans bg-gradient-to-b from-gray-900 via-black to-gray-900 relative overflow-hidden">
-        <Header />
-        {/* Background Effects */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-yellow-400/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-400/10 rounded-full blur-3xl"></div>
-          <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-pink-500/10 rounded-full blur-3xl"></div>
-        </div>
+      <UserLayout>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Breadcrumb */}
           <motion.div
@@ -512,8 +507,7 @@ export default function ProductDetailPage({ product, mainImage, gallery }: Produ
             </motion.div>
           </section>
         </div>
-        <Footer />
-      </div>
+      </UserLayout>
     </>
   )
 }
