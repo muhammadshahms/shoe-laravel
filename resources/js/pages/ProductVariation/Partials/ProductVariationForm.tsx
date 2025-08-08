@@ -25,7 +25,7 @@ export default function ProductVariationForm({
 }: ProductVariationFormProps) {
   return (
     <div className="grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
-      <Card>
+      <Card className="p-4">
         <CardHeader>
           <CardTitle>Variation Details</CardTitle>
           <CardDescription>Basic information about the product variation.</CardDescription>
@@ -110,7 +110,7 @@ export default function ProductVariationForm({
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="p-2">
         <CardHeader>
           <CardTitle>Attributes</CardTitle>
           <CardDescription>Select attribute options for this variation.</CardDescription>
