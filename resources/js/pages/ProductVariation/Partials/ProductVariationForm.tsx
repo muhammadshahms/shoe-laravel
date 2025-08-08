@@ -122,8 +122,8 @@ export default function ProductVariationForm({
               <div className="flex flex-wrap gap-4">
                 {attribute.options.map((option) => (
                   <div key={option.id} className="flex items-center space-x-2">
-                    <pre className="text-sm text-gray-500">{option.label}</pre>
-                    <pre className="text-sm text-gray-500">({option.value})</pre>
+                    {/* <pre className="text-sm text-gray-500">{option.label}</pre>
+                    <pre className="text-sm text-gray-500">({option.value})</pre> */}
                     <Checkbox
                       id={`option-${option.id}`}
                       checked={data.attribute_option_ids?.includes(option.id)}
