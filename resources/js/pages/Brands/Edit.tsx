@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { router } from "@inertiajs/react"
+import { router, usePage } from "@inertiajs/react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -9,6 +9,7 @@ import { ArrowLeft, ExternalLink } from "lucide-react"
 import AppLayout from "@/layouts/app-layout"
 import type { Brand } from "@/validations/brand-schema"
 import { BrandForm } from "./Partials/BrandForm"
+import { BreadcrumbItem } from "@/types"
 
 interface Props {
   brand: Brand
@@ -43,8 +44,12 @@ export default function EditBrand({ brand }: Props) {
     }
   }
 
+  const { breadcrumbs: rawBreadcrumbs } = usePage().props;
+
+  const breadcrumbs = (rawBreadcrumbs ?? []) as BreadcrumbItem[];
+
   return (
-    <AppLayout>
+    <AppLayout breadcrumbs={breadcrumbs}>
       <div className="container mx-auto py-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">

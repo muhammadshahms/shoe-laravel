@@ -1,10 +1,14 @@
 import AppLayout from '@/layouts/app-layout';
 import ProductForm from './Partials/ProductForm';
-import { router } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
+import { BreadcrumbItem } from '@/types';
 
-export default function Edit({ product, brands, categories, main_image_url, gallery_urls }) {
+const { breadcrumbs: rawBreadcrumbs } = usePage().props;
+
+const breadcrumbs = (rawBreadcrumbs ?? []) as BreadcrumbItem[];
+export default function Edit({ product, brands, categories, main_image_url, gallery_urls }: any) {
   return (
-    <AppLayout>
+    <AppLayout breadcrumbs={breadcrumbs}>
       <div className="p-6">
         <h2 className="text-2xl font-bold mb-4">Edit Product</h2>
         <ProductForm

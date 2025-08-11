@@ -2,6 +2,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import AppLayout from "@/layouts/app-layout"
+import { BreadcrumbItem } from "@/types"
+import { usePage } from "@inertiajs/react"
 
 interface Props {
     brand: {
@@ -13,10 +15,12 @@ interface Props {
         logo_url: string
     }
 }
+const { breadcrumbs: rawBreadcrumbs } = usePage().props;
 
+const breadcrumbs = (rawBreadcrumbs ?? []) as BreadcrumbItem[];
 export default function Show({ brand }: Props) {
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Card>
                 <CardHeader>
                     <CardTitle>{brand.name}</CardTitle>

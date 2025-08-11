@@ -26,8 +26,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { router } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
 import Pagination from "@/components/pagination";
+import { BreadcrumbItem } from "@/types";
 
 interface Brand {
   id: string;
@@ -100,9 +101,11 @@ export default function BrandsPage({ brands }: Props) {
   const handleCreate = () => {
     router.get(route("brands.create"));
   };
+  const { breadcrumbs: rawBreadcrumbs } = usePage().props;
 
+  const breadcrumbs = (rawBreadcrumbs ?? []) as BreadcrumbItem[];
   return (
-    <AppLayout>
+    <AppLayout breadcrumbs={breadcrumbs}>
       <div className="container mx-auto py-8 px-4">
         <div className="flex flex-col gap-6">
           {/* Header */}

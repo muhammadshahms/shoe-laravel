@@ -102,18 +102,10 @@ export function CartSheet() {
               <Button className="w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-black hover:from-yellow-300 hover:to-orange-300 font-semibold rounded-xl shadow-lg hover:shadow-yellow-400/25 transition-all duration-300"
                 disabled={cartItems.length === 0}
                 onClick={() =>
-                  router.post("/checkout", {}, {
-                    onSuccess: () => {
-                      router.visit("/checkout", {
-                        preserveScroll: true,
-                      });
-                      // toast.success("Order placed successfully!") // optional feedback
-                      alert("Order placed successfully! Redirecting to checkout...") // optional feedback
-                    },
-                    onError: (errors) => {
-                      // toast.error(errors.error || "Checkout failed")
-                      alert(errors.error || "Checkout failed") // optional feedback
-                    }
+                  router.visit('/checkout', {
+                    method: 'get',
+                    preserveState: true,
+                    preserveScroll: true,
                   })
                 }
               >

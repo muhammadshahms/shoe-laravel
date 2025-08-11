@@ -30,12 +30,18 @@ const mainNavItems: NavItem[] = [
                 title: 'Attributes',
                 href: '/dashboard/attributes',
             },
-        
+
             {
                 title: 'Brands',
                 href: '/dashboard/brands',
             },
         ],
+    },
+    // orders
+    {
+        title: 'Orders',
+        href: '/dashboard/orders',
+        icon: Box,
     },
 ];
 

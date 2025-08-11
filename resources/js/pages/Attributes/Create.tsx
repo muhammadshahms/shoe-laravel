@@ -1,9 +1,10 @@
 import React from 'react';
-import { useForm } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { BreadcrumbItem } from '@/types';
 
 export default function Create() {
   const { data, setData, post, processing, errors } = useForm({
@@ -15,9 +16,12 @@ export default function Create() {
     e.preventDefault();
     post(route('attributes.store'));
   };
+  const { breadcrumbs: rawBreadcrumbs } = usePage().props;
+
+  const breadcrumbs = (rawBreadcrumbs ?? []) as BreadcrumbItem[];
 
   return (
-    <AppLayout>
+    <AppLayout breadcrumbs={breadcrumbs}>
       <div className='p-4'>
         <h1 className="text-xl font-bold mb-4">Create Attribute</h1>
         <form onSubmit={handleSubmit} className="space-y-4 max-w-md">

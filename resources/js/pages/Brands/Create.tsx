@@ -1,12 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { router } from "@inertiajs/react"
+import { router, usePage } from "@inertiajs/react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import AppLayout from "@/layouts/app-layout"
 import { BrandForm } from "./Partials/BrandForm"
+import { BreadcrumbItem } from "@/types"
 
 export default function CreateBrand() {
   const [isLoading, setIsLoading] = useState(false)
@@ -30,9 +31,12 @@ export default function CreateBrand() {
   const handleBack = () => {
     router.visit("/dashboard/brands")
   }
+  const { breadcrumbs: rawBreadcrumbs } = usePage().props;
+
+  const breadcrumbs = (rawBreadcrumbs ?? []) as BreadcrumbItem[];
 
   return (
-    <AppLayout>
+    <AppLayout breadcrumbs={breadcrumbs}>
       <div className="container mx-auto py-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">

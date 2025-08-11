@@ -1,16 +1,20 @@
 "use client"
 
-import { Link } from "@inertiajs/react"
+import { Link, usePage } from "@inertiajs/react"
 import { ChevronLeft } from "lucide-react"
 import type { ProductVariationShowProps } from "./types"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import AppLayout from "@/layouts/app-layout"
+import { BreadcrumbItem } from "@/types"
 
 export default function ProductVariationShow({ variation }: ProductVariationShowProps) {
+  const { breadcrumbs: rawBreadcrumbs } = usePage().props;
+
+  const breadcrumbs = (rawBreadcrumbs ?? []) as BreadcrumbItem[];
   return (
-    <AppLayout>
+    <AppLayout breadcrumbs={breadcrumbs}>
       {" "}
       {/* Wrap with AppLayout */}
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">

@@ -174,7 +174,7 @@ export default function Checkout() {
                         <div key={item.id} className="flex justify-between items-center">
                           <div>
                             <p className="font-medium">{item.title}</p>
-                            <p className="text-sm text-gray-400">{item.quantity} × ${item.price.toFixed(2)}</p>
+                            <p className="text-sm text-gray-400">{item.quantity} × ${typeof item.price === 'number' ? item.price.toFixed(2) : '0.00'}</p>
                           </div>
                           <p className="font-bold">${(item.quantity * item.price).toFixed(2)}</p>
                         </div>

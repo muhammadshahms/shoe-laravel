@@ -1,11 +1,12 @@
 "use client"
 
-import { Head, router } from "@inertiajs/react"
+import { Head, router, usePage } from "@inertiajs/react"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { CategoryForm } from "./Partials/category-form"
 import { Category } from "@/validations/category-schema"
 import AppLayout from "@/layouts/app-layout"
+import { BreadcrumbItem } from "@/types"
 
 interface Props {
   parents: Category[]
@@ -18,8 +19,12 @@ export default function Create({ parents }: Props) {
     })
   }
 
+  const { breadcrumbs: rawBreadcrumbs } = usePage().props;
+
+  const breadcrumbs = (rawBreadcrumbs ?? []) as BreadcrumbItem[];
+
   return (
-    <AppLayout>
+    <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Create Category" />
 
       <div className="px-4">

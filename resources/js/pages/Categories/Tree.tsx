@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Head, router } from "@inertiajs/react"
+import { Head, router, usePage } from "@inertiajs/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { ArrowLeft, Search, ChevronRight, ChevronDown, Plus, Edit, Eye, ImageIcon } from "lucide-react"
 import appLayout from "@/layouts/app-layout"
 import AppLayout from "@/layouts/app-layout"
+import { BreadcrumbItem } from "@/types"
 
 interface Category {
   id: number
@@ -162,10 +163,12 @@ export default function CategoriesTree({ categories }: Props) {
   const collapseAll = () => {
     setExpandedNodes(new Set())
   }
+  const { breadcrumbs: rawBreadcrumbs } = usePage().props;
 
+  const breadcrumbs = (rawBreadcrumbs ?? []) as BreadcrumbItem[];
   return (
     <>
-      <AppLayout>
+      <AppLayout breadcrumbs={breadcrumbs}>
         <Head title="Categories Tree" />
         <div className="container mx-auto py-8 px-4">
           <div className="flex flex-col space-y-6">

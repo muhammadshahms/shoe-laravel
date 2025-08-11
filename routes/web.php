@@ -17,9 +17,7 @@ Route::get('shop', [ProductController::class, 'shop'])->name('shop');
 
 //productdetails
 Route::get('product-details/{product:slug}', [ProductController::class, 'productDetail'])->name('product-details.show');
-Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
-Route::get('/checkout', fn () => Inertia::render('Orders/Checkout'))->middleware('auth')->name('checkout.page');
-Route::post('/checkout', [OrderController::class, 'checkout'])->middleware('auth')->name('checkout');
+
 
 require __DIR__ . '/dashboard.php';
 require __DIR__ . '/auth.php';
@@ -28,3 +26,4 @@ require __DIR__ . '/category/index.php';
 require __DIR__ . '/product-variation/index.php';
 require __DIR__ . '/attribute/index.php';
 require __DIR__ . '/brand/index.php';
+require __DIR__ . '/order/index.php';

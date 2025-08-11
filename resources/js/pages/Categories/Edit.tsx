@@ -1,12 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { Head, router } from "@inertiajs/react"
+import { Head, router, usePage } from "@inertiajs/react"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { Category } from "@/validations/category-schema"
 import { CategoryForm } from "./Partials/category-form"
 import AppLayout from "@/layouts/app-layout"
+import { BreadcrumbItem } from "@/types"
 
 interface Props {
     category: Category
@@ -35,10 +36,12 @@ export default function Edit({ category, parents }: Props) {
             },
         })
     }
+    const { breadcrumbs: rawBreadcrumbs } = usePage().props;
 
+    const breadcrumbs = (rawBreadcrumbs ?? []) as BreadcrumbItem[];
     return (
         <>
-            <AppLayout>
+            <AppLayout breadcrumbs={breadcrumbs}>
                 <Head title={`Edit ${category.name}`} />
                 <div className="container mx-auto py-8 px-4">
                     <div className="flex flex-col space-y-6">

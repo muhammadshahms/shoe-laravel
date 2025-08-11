@@ -3,12 +3,17 @@ import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Props } from '@/validations/product-schema';
+import { BreadcrumbItem } from '@/types';
+import { usePage } from '@inertiajs/react';
+
+
+const { breadcrumbs: rawBreadcrumbs } = usePage().props;
+
+const breadcrumbs = (rawBreadcrumbs ?? []) as BreadcrumbItem[];
 
 export default function Show({ product, brands, categories, main_image_url, gallery_urls }: Props) {
-    console.log({ product, main_image_url, gallery_urls });
-
     return (
-        <AppLayout >
+        <AppLayout breadcrumbs={breadcrumbs}>
             <div className="max-w-4xl mx-auto py-8 space-y-6">
                 {/* Product Card */}
                 <Card>

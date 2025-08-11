@@ -11,6 +11,7 @@ use App\Models\CartItem;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
 class OrderController extends Controller
 {
     /**
@@ -18,8 +19,27 @@ class OrderController extends Controller
      */
     public function index()
     {
-        //
+        $orders = Order::with('user')
+            ->latest()
+            ->paginate(10);
+
+
+        return Inertia::render('Orders/Index', [
+            'orders' => $orders,
+            'breadcrumbs' => [
+                ['label' => 'Dashboard', 'url' => route('dashboard')],
+                ['label' => 'Orders', 'url' => route('orders.index')],
+            ],
+        ]);
     }
+    public function bulkDelete(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        Order::whereIn('id', $ids)->delete();
+
+        return redirect()->route('orders.index')->with('success', 'Selected orders deleted.');
+    }
+
 
     /**
      * Show the form for creating a new resource.
@@ -66,8 +86,18 @@ class OrderController extends Controller
      */
     public function update(Request $request, Order $order)
     {
-        //
+        $validated = $request->validate([
+            'status' => 'nullable|string|in:pending,processing,completed,cancelled',
+            'payment_status' => 'nullable|string|in:pending,paid,failed,refunded',
+        ]);
+
+        // Only update provided fields
+        $order->fill($validated);
+        $order->save();
+
+        return back()->with('success', 'Order updated successfully.');
     }
+
 
     /**
      * Remove the specified resource from storage.
@@ -75,6 +105,17 @@ class OrderController extends Controller
     public function destroy(Order $order)
     {
         //
+    }
+
+    public function generateInvoice(Order $order)
+    {
+        $order->load(['user', 'cartItems.product']);
+
+        $pdf = Pdf::loadView('invoices.order', [
+            'order' => $order
+        ]);
+
+        return $pdf->download('invoice-' . $order->order_number . '.pdf');
     }
 
     public function checkout(Request $request)

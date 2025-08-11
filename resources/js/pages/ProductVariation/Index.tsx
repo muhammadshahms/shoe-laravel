@@ -34,8 +34,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { ProductVariation } from "@/validations/product-variation-schema"
-import { Link, router } from "@inertiajs/react"
+import { Link, router, usePage } from "@inertiajs/react"
 import AppLayout from "@/layouts/app-layout"
+import { BreadcrumbItem } from "@/types"
 
 interface ProductVariationIndexProps {
   variations: {
@@ -63,8 +64,12 @@ export default function ProductVariationIndex({ variations }: ProductVariationIn
     })
   }
 
+  const { breadcrumbs: rawBreadcrumbs } = usePage().props;
+
+  const breadcrumbs = (rawBreadcrumbs ?? []) as BreadcrumbItem[];
+
   return (
-    <AppLayout>
+    <AppLayout breadcrumbs={breadcrumbs}>
       <div className="p-6">
         <div className="flex items-center justify-between">
           <div>

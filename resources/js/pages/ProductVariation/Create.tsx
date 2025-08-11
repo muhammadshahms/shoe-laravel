@@ -2,13 +2,14 @@
 
 import type React from "react"
 
-import { Link, useForm } from "@inertiajs/react"
+import { Link, useForm, usePage } from "@inertiajs/react"
 import { ChevronLeft } from "lucide-react"
 import type { ProductVariationCreateProps, ProductVariationFormData } from "./types"
 import { Button } from "@/components/ui/button"
 // import { toast } from "@/hooks/use-toast"
 import ProductVariationForm from "./Partials/ProductVariationForm" // Import the new form component
 import AppLayout from "@/layouts/app-layout"
+import { BreadcrumbItem } from "@/types"
 
 export default function ProductVariationCreate({ products, attributes }: ProductVariationCreateProps) {
   const { data, setData, post, processing, errors } = useForm<ProductVariationFormData>({
@@ -51,9 +52,11 @@ export default function ProductVariationCreate({ products, attributes }: Product
       }
     })
   }
+  const { breadcrumbs: rawBreadcrumbs } = usePage().props;
 
+  const breadcrumbs = (rawBreadcrumbs ?? []) as BreadcrumbItem[];
   return (
-    <AppLayout>
+    <AppLayout breadcrumbs={breadcrumbs}>
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
           <div className="mx-auto grid max-w-[59rem] flex-1 auto-rows-max gap-4">
