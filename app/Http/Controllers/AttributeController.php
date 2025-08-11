@@ -9,14 +9,24 @@ use Inertia\Inertia;
 
 class AttributeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $attributes = Attribute::withCount('options')->get();
+        $search = $request->get('search');
+
+        $attributes = Attribute::withCount('options')
+            ->when($search, function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('code', 'like', "%{$search}%");
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
 
         return Inertia::render('Attributes/Index', [
             'attributes' => $attributes,
         ]);
     }
+
 
     public function create()
     {
@@ -27,7 +37,7 @@ class AttributeController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            
+
         ]);
 
         $validated['code'] = Str::slug($validated['name']);

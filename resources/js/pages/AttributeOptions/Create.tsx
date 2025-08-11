@@ -1,40 +1,123 @@
-import React from 'react';
-import { useForm } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
+"use client";
 
-export default function Create({ attribute }) {
-  const { data, setData, post, processing, errors } = useForm({
-    label: '',
-    value: '',
+import React from "react";
+import { usePage, Head, Link, router } from "@inertiajs/react";
+import AppLayout from "@/layouts/app-layout";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { BreadcrumbItem } from "@/types";
+import { z } from "zod";
+import { useForm as useReactHookForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const optionSchema = z.object({
+  label: z.string().min(1, "Label is required"),
+  value: z.string().min(1, "Value is required"),
+});
+
+type OptionForm = z.infer<typeof optionSchema>;
+
+interface CreateOptionProps {
+  attribute: {
+    id: number;
+    name: string;
+  };
+}
+
+export default function CreateOption({ attribute }: CreateOptionProps) {
+  const { breadcrumbs: rawBreadcrumbs } = usePage().props;
+  const breadcrumbs = (rawBreadcrumbs ?? []) as BreadcrumbItem[];
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useReactHookForm<OptionForm>({
+    resolver: zodResolver(optionSchema),
+    defaultValues: {
+      label: "",
+      value: "",
+    },
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    post(route('attributes.options.store', attribute.id));
+  const onSubmit = (values: OptionForm) => {
+    router.post(route("attributes.options.store", attribute.id), values);
   };
 
   return (
-    <AppLayout title={`Add Option for ${attribute.name}`}>
-      <div className='p-4'>
-        <h1 className="text-xl font-bold mb-4">Add Option for {attribute.name}</h1>
-        <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
-          <div>
-            <Label>Label</Label>
-            <Input value={data.label} onChange={e => setData('label', e.target.value)} />
-            {errors.label && <div className="text-red-500 text-sm">{errors.label}</div>}
+    <AppLayout breadcrumbs={breadcrumbs}>
+      <Head title={`Add Option for ${attribute.name}`} />
+
+      <div className="container mx-auto py-8 px-4">
+        <div className="flex flex-col gap-6">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h1 className="text-3xl font-bold">
+                Add Option for {attribute.name}
+              </h1>
+              <p className="text-muted-foreground">
+                Create a new option for this attribute
+              </p>
+            </div>
+            <Link href={route("attributes.show", attribute.id)}>
+              <Button variant="outline">Back to Attribute</Button>
+            </Link>
           </div>
 
-          <div>
-            <Label>Value</Label>
-            <Input value={data.value} onChange={e => setData('value', e.target.value)} />
-            {errors.value && <div className="text-red-500 text-sm">{errors.value}</div>}
-          </div>
+          {/* Form Card */}
+          <Card className="max-w-xl">
+            <CardContent className="p-6">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                {/* Label */}
+                <div>
+                  <Label htmlFor="label">Label</Label>
+                  <Input
+                    id="label"
+                    placeholder="Enter option label"
+                    {...register("label")}
+                  />
+                  {errors.label && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {errors.label.message}
+                    </p>
+                  )}
+                </div>
 
-          <Button type="submit" disabled={processing}>Save</Button>
-        </form>
+                {/* Value */}
+                <div>
+                  <Label htmlFor="value">Value</Label>
+                  <Input
+                    id="value"
+                    placeholder="Enter option value"
+                    {...register("value")}
+                  />
+                  {errors.value && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {errors.value.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => history.back()}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting}>
+                    Save
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </AppLayout>
   );

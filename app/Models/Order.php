@@ -19,6 +19,7 @@ class Order extends Model
     const STATUS_PROCESSING = 'processing';
     const STATUS_COMPLETED = 'completed';
     const STATUS_CANCELLED = 'cancelled';
+
     protected static function booted()
     {
         static::creating(function ($order) {

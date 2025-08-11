@@ -11,7 +11,15 @@ class AttributeOptionController extends Controller
 {
     public function index(Attribute $attribute)
     {
-        $options = $attribute->options()->get();
+        $options = $attribute->options()->latest()->paginate(10)->withQueryString();
+
+        $options->transform(function ($option) {
+            return [
+                'id' => $option->id,
+                'value' => $option->value,
+                'label' => $option->label,
+            ];
+        });
 
         return Inertia::render('AttributeOptions/Index', [
             'attribute' => $attribute,
