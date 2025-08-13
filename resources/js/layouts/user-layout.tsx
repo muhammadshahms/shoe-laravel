@@ -23,7 +23,7 @@ export default function UserLayout({ children }: UserLayoutProps) {
             </div>
 
             {/* Page Content */}
-            <main className="relative flex-1 z-10">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 {children}
             </main>
 
