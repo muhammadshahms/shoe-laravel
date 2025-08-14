@@ -12,12 +12,9 @@ import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Profile settings',
-        href: '/settings/profile',
-    },
-];
+const { breadcrumbs: rawBreadcrumbs } = usePage().props;
+
+const breadcrumbs = (rawBreadcrumbs ?? []) as BreadcrumbItem[];
 
 type ProfileForm = {
     name: string;

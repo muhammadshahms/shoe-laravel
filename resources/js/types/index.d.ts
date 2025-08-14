@@ -8,6 +8,7 @@ export interface Auth {
 export interface BreadcrumbItem {
     title: string;
     href: string;
+    
 }
 
 export interface NavGroup {
@@ -20,6 +21,7 @@ export interface NavItem {
     href: string;
     icon?: LucideIcon | null;
     isActive?: boolean;
+    children?: NavItem[];
 }
 
 export interface SharedData {
