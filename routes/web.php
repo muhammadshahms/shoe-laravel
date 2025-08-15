@@ -27,3 +27,4 @@ require __DIR__ . '/product-variation/index.php';
 require __DIR__ . '/attribute/index.php';
 require __DIR__ . '/brand/index.php';
 require __DIR__ . '/order/index.php';
+require __DIR__ . '/banner/index.php';

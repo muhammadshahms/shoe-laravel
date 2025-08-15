@@ -14,15 +14,21 @@ class Banner extends Model implements HasMedia
 
     protected $fillable = [
         'title',
-        'link',
+        'description',
+        "start_date",
+        "end_date",
+        "type",
         'is_active'
     ];
-    public function registerMediaConversions(?Media $media = null): void
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
+    //spatie media
+    public function registerMediaCollections(): void
     {
-        $this->addMediaConversion('web')
-            ->width(1920)
-            ->height(600)
-            ->sharpen(10)
-            ->nonQueued();
+        $this->addMediaCollection('banner')
+            ->singleFile()
+            ->useFallbackUrl('/images/default-brand.png');
     }
 }
