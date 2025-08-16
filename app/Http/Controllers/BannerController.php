@@ -11,7 +11,7 @@ class BannerController extends Controller
 {
     public function __construct()
     {
-        $this->authorizeResource(Banner::class, 'banner');
+        // $this->authorizeResource(Banner::class, 'banner');
     }
 
     /**
@@ -56,43 +56,31 @@ class BannerController extends Controller
             'description' => 'nullable|string|max:1000',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'type' => ['required', Rule::in(['promo', 'info', 'other'])],
+            'type' => ['required', Rule::in(['slider', 'banner'])],
             'is_active' => 'boolean',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'banner_image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        $image = $data['image'] ?? null;
-        unset($data['image']);
+        $bannerImage = $data['banner_image'] ?? null;
+        unset($data['banner_image']);
 
         // agar is_active true hai to baaki sab ko deactivate kar do
-        if (!empty($data['is_active']) && $data['is_active'] == true) {
-            Banner::where('is_active', true)->update(['is_active' => false]);
+        if (!empty($data['is_active']) && $data['is_active'] == true && $data['type'] === 'banner') {
+            Banner::where('type', 'banner')
+                ->where('is_active', true)
+                ->update(['is_active' => false]);
         }
 
         $banner = Banner::create($data);
 
-        if ($image) {
-            $banner->addMediaFromRequest('image')->toMediaCollection('banner');
+        if ($bannerImage) {
+            $banner->addMediaFromRequest('banner_image')->toMediaCollection('banner');
         }
 
         return redirect()->route('banners.index')
             ->with('success', 'Banner created successfully.');
     }
 
-    /**
-     * Show the form for editing the banner.
-     */
-    public function edit(Banner $banner)
-    {
-        return Inertia::render('Banners/Edit', [
-            'banner' => $banner->toArray(),
-            'banner_image' => $banner->getFirstMediaUrl('banner', 'web') ?: '/images/default-banner.png',
-        ]);
-    }
-
-    /**
-     * Update the specified banner.
-     */
     public function update(Request $request, Banner $banner)
     {
         $data = $request->validate([
@@ -100,27 +88,30 @@ class BannerController extends Controller
             'description' => 'nullable|string|max:1000',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'type' => ['required', Rule::in(['promo', 'info', 'other'])],
+            'type' => ['required', Rule::in(['slider', 'banner'])],
             'is_active' => 'sometimes|boolean',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'banner_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        $image = $data['image'] ?? null;
-        unset($data['image']);
+        $bannerImage = $data['banner_image'] ?? null;
+        unset($data['banner_image']);
 
         // agar is_active true set karna hai to baaki sab ko deactivate kar do
-        if (!empty($data['is_active']) && $data['is_active'] == true) {
-            Banner::where('id', '!=', $banner->id)->update(['is_active' => false]);
+        if (!empty($data['is_active']) && $data['is_active'] == true && $data['type'] === 'banner') {
+            Banner::where('type', 'banner')
+                ->where('id', '!=', $banner->id)
+                ->update(['is_active' => false]);
         }
 
         $banner->update($data);
 
-        if ($image) {
+        if ($bannerImage) {
             $banner->clearMediaCollection('banner');
-            $banner->addMediaFromRequest('image')->toMediaCollection('banner');
+            $banner->addMediaFromRequest('banner_image')->toMediaCollection('banner');
         }
 
         return redirect()->route('banners.index')
             ->with('success', 'Banner updated successfully.');
     }
+
 }

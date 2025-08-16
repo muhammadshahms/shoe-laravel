@@ -2,12 +2,20 @@
 
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
+use App\Models\Banner;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    
-    return Inertia::render('welcome');
+    $activeBanners = Banner::where('is_active', true)->get();
+    $activeBanners = $activeBanners->map(function ($banner) {
+        $banner->banner_image = $banner->getFirstMediaUrl('banner', 'web') ?: '/images/default-banner.png';
+        return $banner;
+    });
+    // dd($activeBanners);
+    return Inertia::render('welcome', [
+        'banners' => $activeBanners,
+    ]);
 })->name('home');
 
 Route::get('/product-details', function () {

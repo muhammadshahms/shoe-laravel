@@ -39,15 +39,15 @@ const createSchema = z.object({
   description: z.string().max(1000).optional(),
   start_date: z.string().nonempty("Start date is required"),
   end_date: z.string().nonempty("End date is required"),
-  type: z.enum(["promo", "info", "other"], {
+  type: z.enum(["banner", "slider"], {
     required_error: "Type is required",
   }),
   is_active: z
     .union([z.boolean(), z.string()])
     .transform((val) => val === true || val === "1" || val === "true")
     .default(true),
-  image: z
-    .instanceof(File, { message: "Image is required" })
+  banner_image: z
+    .instanceof(File, { message: "Banner image is required" })
     .refine((file) => file.size <= MAX_FILE_SIZE, "Image must be less than 2MB")
     .refine(
       (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
@@ -57,7 +57,7 @@ const createSchema = z.object({
 
 // Schema for edit mode (image optional)
 const editSchema = createSchema.extend({
-  image: z
+  banner_image: z
     .instanceof(File)
     .refine((file) => file.size <= MAX_FILE_SIZE, "Image must be less than 2MB")
     .refine(
@@ -70,7 +70,7 @@ const editSchema = createSchema.extend({
 export type BannerFormValues = z.infer<typeof createSchema>;
 
 interface BannerFormProps {
-  initialData?: Partial<BannerFormValues> & { id?: number; image_url?: string };
+  initialData?: Partial<BannerFormValues> & { id?: number; banner_image?: string };
   onSubmit: (data: FormData) => void;
   mode?: "create" | "edit";
 }
@@ -81,7 +81,7 @@ export default function BannerForm({
   mode = "create",
 }: BannerFormProps) {
   const [preview, setPreview] = useState<string | null>(
-    initialData?.image_url || null
+    initialData?.banner_image || null
   );
 
   const form = useForm<BannerFormValues>({
@@ -91,7 +91,7 @@ export default function BannerForm({
       description: initialData?.description || "",
       start_date: initialData?.start_date || "",
       end_date: initialData?.end_date || "",
-      type: initialData?.type || "promo",
+      type: initialData?.type || "banner",
       is_active: initialData?.is_active ?? true,
     },
   });
@@ -99,7 +99,7 @@ export default function BannerForm({
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      form.setValue("image", file as any, { shouldValidate: true });
+      form.setValue("banner_image", file as any, { shouldValidate: true });
       setPreview(URL.createObjectURL(file));
     }
   };
@@ -110,8 +110,8 @@ export default function BannerForm({
       if (value !== undefined && value !== null) {
         if (key === "is_active") {
           formData.append(key, value ? "1" : "0");
-        } else if (key === "image" && value instanceof File) {
-          formData.append("image", value);
+        } else if (key === "banner_image" && value instanceof File) {
+          formData.append("banner_image", value);
         } else {
           formData.append(key, value as any);
         }
@@ -119,7 +119,7 @@ export default function BannerForm({
     });
 
     if (initialData?.id) {
-      formData.append("_method", "PUT"); // Laravel PUT
+      formData.append("_method", "PUT");
     }
 
     onSubmit(formData);
@@ -207,9 +207,8 @@ export default function BannerForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="promo">Promo</SelectItem>
-                    <SelectItem value="info">Info</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value="banner">Banner</SelectItem>
+                    <SelectItem value="slider">Slider</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -236,10 +235,10 @@ export default function BannerForm({
             )}
           />
 
-          {/* Image */}
+          {/* Banner Image */}
           <FormField
             control={form.control}
-            name="image"
+            name="banner_image"
             render={() => (
               <FormItem>
                 <FormLabel>Banner Image</FormLabel>

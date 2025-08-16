@@ -9,6 +9,8 @@ import Header from "@/components/Global/Header"
 import Footer from "@/components/Global/Footer"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import UserLayout from "@/layouts/user-layout"
+import Banner from "@/components/Banner"
+// import FeaturedBanner from "@/components/Banner"
 
 type Product = {
   title: string
@@ -121,7 +123,7 @@ const allProducts: ProductsByCategory = {
   ],
 }
 
-export default function AllRunPage() {
+export default function AllRunPage({ banners }: any) {
   const productsPerPage = 6
   const [currentPages, setCurrentPages] = useState(Object.fromEntries(categories.map((cat) => [cat, 0])))
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
@@ -535,29 +537,7 @@ export default function AllRunPage() {
           </Tabs>
         </section>
 
-        {/* Popular Products Section */}
-        <section className="px-4 py-20">
-          <motion.h3
-            className="text-4xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent mb-12 text-center"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            Featured Products
-          </motion.h3>
-
-          <div className="relative max-w-7xl mx-auto mb-16">
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl">
-              <img
-                src="/shoe-banner.jpg"
-                alt="Adidas Terrex CMTK Gore-Tex Outdoor Running Shoes"
-                className="w-full object-cover"
-                style={{ height: '300px' }}
-              />
-            </div>
-          </div>
-        </section>
+        <Banner banners={banners} />
       </UserLayout>
     </>
   )
