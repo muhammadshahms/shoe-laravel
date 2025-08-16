@@ -35,12 +35,19 @@ const mainNavItems: NavItem[] = [
                 title: 'Brands',
                 href: '/dashboard/brands',
             },
+
         ],
     },
     // orders
     {
         title: 'Orders',
         href: '/dashboard/orders',
+        icon: Box,
+    },
+    //banners
+    {
+        title: 'Banners',
+        href: '/dashboard/banners',
         icon: Box,
     },
 ];

@@ -32,7 +32,6 @@ class BannerController extends Controller
 
         // Pagination (10 per page)
         $banners = $query->latest()->paginate(10)->withQueryString();
-        dd($banners);
         return Inertia::render('Banners/Index', [
             'banners' => $banners,
             'filters' => $request->only('search'),
@@ -62,9 +61,13 @@ class BannerController extends Controller
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        // Remove image from mass assignment
         $image = $data['image'] ?? null;
         unset($data['image']);
+
+        // agar is_active true hai to baaki sab ko deactivate kar do
+        if (!empty($data['is_active']) && $data['is_active'] == true) {
+            Banner::where('is_active', true)->update(['is_active' => false]);
+        }
 
         $banner = Banner::create($data);
 
@@ -102,9 +105,13 @@ class BannerController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        // Remove image from mass assignment
         $image = $data['image'] ?? null;
         unset($data['image']);
+
+        // agar is_active true set karna hai to baaki sab ko deactivate kar do
+        if (!empty($data['is_active']) && $data['is_active'] == true) {
+            Banner::where('id', '!=', $banner->id)->update(['is_active' => false]);
+        }
 
         $banner->update($data);
 
@@ -115,17 +122,5 @@ class BannerController extends Controller
 
         return redirect()->route('banners.index')
             ->with('success', 'Banner updated successfully.');
-    }
-
-    /**
-     * Remove the specified banner.
-     */
-    public function destroy(Banner $banner)
-    {
-        $banner->clearMediaCollection('banner');
-        $banner->delete();
-
-        return redirect()->route('banners.index')
-            ->with('success', 'Banner deleted successfully.');
     }
 }
