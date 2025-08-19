@@ -9,7 +9,8 @@ import Header from "@/components/Global/Header"
 import Footer from "@/components/Global/Footer"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import UserLayout from "@/layouts/user-layout"
-import Banner from "@/components/Banner"
+import SliderBanner from "@/components/SliderBanner"
+import SimpleBanner from "@/components/SimpleBanner"
 // import FeaturedBanner from "@/components/Banner"
 
 type Product = {
@@ -123,7 +124,7 @@ const allProducts: ProductsByCategory = {
   ],
 }
 
-export default function AllRunPage({ banners }: any) {
+export default function AllRunPage({ sliderBanners, simpleBanners }: any) {
   const productsPerPage = 6
   const [currentPages, setCurrentPages] = useState(Object.fromEntries(categories.map((cat) => [cat, 0])))
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
@@ -537,7 +538,9 @@ export default function AllRunPage({ banners }: any) {
           </Tabs>
         </section>
 
-        <Banner banners={banners} />
+        <SliderBanner banners={sliderBanners} />
+        <SimpleBanner banners={simpleBanners} />
+
       </UserLayout>
     </>
   )

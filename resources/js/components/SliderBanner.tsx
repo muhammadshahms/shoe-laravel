@@ -11,13 +11,14 @@ export type Banner = {
   description: string
   banner_image: string
   is_active: boolean
+  type: "slider"
 }
 
 interface Banners {
   banners: Banner[]
 }
 
-export default function Banner({ banners }: Banners) {
+export default function SliderBanner({ banners }: Banners) {
   const [currentBanner, setCurrentBanner] = useState(0)
 
   useEffect(() => {
@@ -37,7 +38,7 @@ export default function Banner({ banners }: Banners) {
 
   return (
     <section className="relative px-4 py-20 overflow-hidden">
-      <motion.div
+      {/* <motion.div
         className="text-center mb-12"
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -50,7 +51,7 @@ export default function Banner({ banners }: Banners) {
         <p className="text-gray-400 text-lg max-w-2xl mx-auto">
           Explore our handpicked selection of premium footwear collections.
         </p>
-      </motion.div>
+      </motion.div> */}
 
       <div className="relative max-w-6xl mx-auto">
         {/* Banner Container */}
